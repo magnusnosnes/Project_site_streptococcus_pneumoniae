@@ -1,0 +1,16 @@
+{
+  "hash": "bef2f2d6dc6a3e61c779d90b61c74da1",
+  "result": {
+    "markdown": "---\ntitle: \"Disentangling penicillin resistance and compensatory adaption in pneumococci by combining genomics and molecular microbiology\"\nauthor-title: \"The DNA detectives\"\n---\n\n\nPenicillin resistance is a major concern in the field of microbiology, as it poses a threat to the effectiveness of one of the most commonly used antibiotics. Pneumococci, a type of bacteria that can cause pneumonia, are particularly known for their ability to develop resistance to penicillin. In this website, we explore the latest research on the mechanisms of penicillin resistance in pneumococci and how it is related to compensatory adaptation. We combine the fields of genomics and molecular microbiology to better understand these complex processes and their implications for the treatment of bacterial infections.\n\nThis project will focus specifically on penicillin binding proteins (PBPs), the mechanisms by which they function, and mutations that alter their minimum inhibitory concentrations (MICs). PBPs are enzymes that are responsible for the synthesis of the bacterial cell wall, and they are the primary target of penicillin and other beta-lactam antibiotics. Mutations in the genes encoding these proteins can lead to changes in their structure and function, allowing the bacteria to become resistant to the antibiotics. By studying the genetic and molecular basis of these mutations, we can gain a deeper understanding of the mechanisms of penicillin resistance in pneumococci and develop more effective strategies for combating these infections.\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1 + 1\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n[1] 2\n```\n:::\n:::\n\n\n#More about Quarto websites: \nTo learn more about Quarto websites visit <https://quarto.org/docs/websites>.",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

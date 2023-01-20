@@ -1,0 +1,177 @@
+---
+title: "Penicillin binding proteins"
+date: 2022-12-14
+editor: visual
+image: cover.jpg
+knitr:
+  opts_chunk: 
+    comment: "#>" 
+    warning: FALSE
+    message: FALSE
+    collapse: TRUE
+    cache: FALSE
+execute:
+  echo: false
+  message: false
+format: 
+  html:
+    fig-width: 8
+    fig-height: 12
+    page-layout: full
+---
+
+PBPs are a type of protein found in bacteria that bind to penicillin, a type of antibiotic. PBPs play a key role in the synthesis of the bacterial cell wall, and when they bind to penicillin, they can interfere with this process. As a result, the growth and division of the bacterial cells can be impaired, making the antibiotic effective at killing or inhibiting the growth of the bacteria. It is important to note that some bacteria can develop resistance to antibiotics by producing PBPs that are resistant to the effects of the antibiotic. In these cases, the antibiotic may not be effective at killing or inhibiting the growth of the bacteria, making it important to use a different type of antibiotic or to use a combination of antibiotics to effectively treat the infection.
+
+The PBPs presented in this document were determined by running [Pathogenwatch](https://pathogen.watch/), which uses a machine learning procedure PBP typing scheme . The visualization provides a representation of the distribution and abundance of the different types of PBPs in our collection.
+
+```{r remedy001}
+# Specify the names of the files to read
+filenames <- c("pbps_USA.csv", "pbps_maela.csv", "pbps_massachusetts.csv", 
+               "pbps_norway_historic.csv", "pbps_norway_routine.csv", "pbps_south_africa.csv")
+filenames = paste0("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/03_PBPs/", filenames)
+
+# Read each file and store the resulting data frame in a list
+data_frames <- lapply(filenames, read.csv)
+
+n_in_study = unlist(lapply(data_frames, nrow))
+dataset = rep(c("USA", "maela", "massachusetts", "norway_historic", "norway_routine", "south_africa"), n_in_study)
+# Use rbind to combine the data frames in the list into a single data frame
+combined_data <- do.call(rbind, data_frames)
+combined_data$dataset = dataset
+
+write.table(combined_data,"~/Dropbox/Postdoc_pneumococcus/00_Collection_overview/PBPs.csv")
+
+
+#   ____________________________________________________________________________
+#   prompt                                                                  ####
+# My dataset looks like this:
+# 
+#   PBP1a PBP2b PBP2x dataset
+# 1    42    42     8     USA
+# 2     1     0     6     USA
+# 3     2     4     0     USA
+# 
+# I want to make a function that plots barplots of the PBP1a, PBP2b, and the PBP2x columns in the combined dataset. 
+# Use ggplot to do following things: 
+# Define a barplot function called barplot_pbps_in_dataset.
+# Make the barplot function select the rows of the combined data that corresponding to an user input value (string).
+# Make a barplot of PBP1a using ggplot on the the selected rows. Set the title of the plot to PBP1a.
+# Make a barplot of PBP2b using the selected rows. Set the title of the plot to PBP2b.
+# Make a barplot of PBP2x using the selected rows. Set the title of the plot to PBP2x.
+# Arrange the barplots in 3 rows and 1 column, and return the plot to the user.
+# 
+#  [1] "42"  "1"   "2"   "45"  "0"   "NF" "NEW" "208" "141" "111"
+# R-programming language. 
+# Reorder this factor variable by dplyr and sort by the sorting by numeric values. Make any non-numeric values appear last. turn it back into a factor
+# 
+
+#   ____________________________________________________________________________
+#   End prompt                                                              ####
+
+
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+
+reorder_and_sort_factor = function(data,column) {
+  
+  #Count and reorder by counts
+  pbp_tab = table(data[,column])
+  pbp_tab = sort(pbp_tab, decreasing=T)
+  #Store the non_numeric values
+  extra = pbp_tab[names(pbp_tab)%in%c("NF", "NEW")]
+  #Remove the non-numeric values
+  pbp_tab = pbp_tab[(names(pbp_tab)%in%c("NF", "NEW"))==F]
+  pbp_tab = c(pbp_tab,extra)
+  pbp_tab  = as.data.frame(pbp_tab)
+  pbp_tab$type=rownames(pbp_tab)
+  pbp_tab$type = factor(pbp_tab$type, levels=pbp_tab$type)
+  pbp_tab$counts = pbp_tab$.
+  rownames(pbp_tab)=NULL
+  pbp_tab
+}
+
+
+barplot_pbps_in_dataset <- function(data, dataset,plot=F){
+  #Debug:
+  #data = combined_data; dataset="USA";
+  
+  # Select rows that correspond to the given country
+  selected_data <- data[data$dataset == dataset,]
+  
+  #Count and reorder by counts
+  pbp1a_tab = reorder_and_sort_factor(selected_data,"PBP1a")
+  pbp2b_tab = reorder_and_sort_factor(selected_data,"PBP2b")
+  pbp2x_tab = reorder_and_sort_factor(selected_data,"PBP2x")
+  
+  # Create barplots for PBP1a, PBP2b, and PBP2x
+  pbp1a <- ggplot(pbp1a_tab, aes(x=type,y=pbp_tab)) +
+    geom_bar(stat = "identity")+theme_bw()+xlab("PBP1a type")+theme(axis.text.x = element_text(angle = 90))+ylab("PBP1a")
+  
+  pbp2b <- ggplot(pbp2b_tab, aes(x=type,y=pbp_tab)) +
+    geom_bar(stat = "identity") +theme_bw()+xlab("PBP1a type")+theme(axis.text.x = element_text(angle = 90))+ylab("PBP2b")
+  
+  pbp2x <- ggplot(pbp2x_tab, aes(x=type,y=pbp_tab)) +
+    geom_bar(stat = "identity") +theme_bw()+xlab("PBP1a type")+theme(axis.text.x = element_text(angle = 90))+ylab("PBP2x")
+  
+  # Arrange plots in 3 rows and 1 column
+  if(plot==T){
+    grid.arrange(pbp1a, pbp2b, pbp2x, nrow = 3)  
+  }
+  return(list("pbp1a"=pbp1a,"pbp2b"=pbp2b,"pbp2x"=pbp2x))
+}
+
+library(plotly)
+
+interactive_pbps = function(output_barplots) {
+  #plotly::ggplotly(output_barplots$pbp1a)
+  #output_barplots = barplot_pbps_in_dataset(combined_data,"norway_routine")
+  plots = subplot(output_barplots$pbp1a, output_barplots$pbp2b, output_barplots$pbp2x, nrows = 3, titleY = TRUE)
+  ggplotly(plots,layout(autosize = F, width = 500, height = 500))
+}
+library(shiny)
+
+make_plots = function(total_data, dataset) {
+  c1 = barplot_pbps_in_dataset(total_data,dataset)
+  interactive_pbps(c1)
+}
+
+```
+
+::: {.panel-tabset style="width:135%"}
+## Norway Routine
+
+```{r}
+make_plots(combined_data,"norway_routine")
+```
+
+## Norway historic
+
+```{r}
+make_plots(combined_data,"norway_historic")
+```
+
+## Maela
+
+```{r}
+make_plots(combined_data,"maela")
+```
+
+## South Africa
+
+```{r}
+make_plots(combined_data,"south_africa")
+```
+
+## Massachusetts
+
+```{r}
+make_plots(combined_data,"massachusetts")
+```
+
+## USA
+
+```{r}
+make_plots(combined_data,"USA")
+```
+:::

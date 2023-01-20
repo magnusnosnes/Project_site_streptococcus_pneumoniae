@@ -1,0 +1,9 @@
+# function to match indexes of identities in two data sets
+match_indexes <- function(identity_in_data1, identity_in_data2) {
+  
+  # apply a function to each element of identity_in_data1
+  unlist(lapply(identity_in_data1, function(x) {
+    # return the index of the element in identity_in_data2 that matches x
+    which(x==identity_in_data2)
+  }))
+}

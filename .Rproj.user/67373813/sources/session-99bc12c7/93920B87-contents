@@ -1,0 +1,278 @@
+#   Author: Magnus Nygard Osnes
+#  Date: 2019-05-15
+
+blast_eloR_full <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/blast_output_eloR_full_reverse.txt", header=TRUE, sep="\t", comment.char="#")
+
+# Add column names
+colnames(blast_eloR_full) <- c("query", "subject", "identity", "alignment_length", "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+
+
+# Extract contig number
+blast_eloR_full$contig_number<- gsub("^.*?_(\\d+)_.*", "\\1", blast_eloR_full$query)
+
+# Extract query_id
+blast_eloR_full$query_id <- gsub("^(.*?)_.*", "\\1", blast_eloR_full$query)
+
+
+# Read fasta file locations
+fasta_files = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Om_samlingen/input.txt")
+
+# Replace file ending ".fasta" with ".gff3" from fasta_files
+gff_files = gsub("\\.fasta$", ".gff3", fasta_files$V1)
+
+gff_files_identifiers = gsub(".gff3", "", gff_files); gff_files_identifiers = gsub(".*/", "", gff_files_identifiers)
+
+# Find the index of the query_id in the table of gff files
+inds = unlist(lapply(blast_eloR_full$query_id, function(x) which(x==gff_files_identifiers)))
+
+# Extract the file locations
+blast_eloR_full$file_location = gff_files[inds]
+
+#There is something weird among the names
+    
+
+# I am trying to write a script to find overlaps between the blast search and annotations in a gff3 file. 
+# Can you help me write the code. Base it on the pseudocode I wrote below and fill out the lines.
+
+# Loop over all lines in the blast table.
+# For each line:
+# Open the gff3 file.
+# Find the overlap between q_start, q_end
+# Extract the name of the gene 
+# Go to the contig position
+# Extract the found start and end positions from that contig
+# Calculate the length of the gene
+
+#library(tidyverse)
+
+# Load the blast table
+blast_table <- blast_eloR_full
+results = matrix(nrow = nrow(blast_table),ncol = 6)
+colnames(results)= c("Query", "Subject", "Identity", "Alignment length:", "Gene name:", "Gene length:")
+
+# Loop over all lines in the blast table
+for (i in 1:nrow(blast_table)) {
+  cat(round(i/nrow(blast_table),2)*100,"%\r")
+  # For each line
+  blast_line <- blast_table[i,]
+  
+  # Open the gff3 file
+  gff3_file = read.delim(blast_line$file_location, header=F, comment.char="#")
+  
+  colnames(gff3_file) = c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
+  
+  select_lines = which(gff3_file$seqid == paste0("contig_",blast_line$contig_number))
+  
+  # Filter for the correct contig:
+  gff3_file = gff3_file[select_lines,]
+  
+  #Only use the last TRUE value
+  line_select_gff3 <- max(which(blast_line$q_start >= gff3_file$start))
+  
+  # Find the overlap between q_start, q_end
+  gff3_overlap = gff3_file[line_select_gff3,]
+  
+  #gff3_overlap <- gff3_file %>% filter(blast_line$q_start >= start  & blast_line$q_end <= end & type!="region")
+  
+  
+  
+  #DEBUG
+  #cbind(gff3_file[,c("start","end")],blast_line$q_start >= gff3_file$start, blast_line$q_end <= gff3_file$end)
+  #gff3_file$start >= blast_line$q_start
+  #c2 = gff3_file$end <= blast_line$q_end
+  
+  
+  # Filter for the right contig
+  
+  
+  # Select correct match
+  
+  # Print warning if gff3_overlap still has multiple matches.
+  if(nrow(gff3_overlap) > 1) {
+    warning("Multiple matches found for query", blast_line$query)
+  }
+  
+  # Extract the name of the gene
+  gene_name <- gff3_overlap$attributes
+
+  # Extract the found start and end positions from that contig
+  gene_start <- gff3_overlap$start
+  gene_end <- gff3_overlap$end
+  
+  # Calculate the length of the gene
+  gene_length <- gene_end - gene_start
+  
+  # Print the results
+  # cat("Query:", blast_line$query, "\n")
+  # cat("Subject:", blast_line$subject, "\n")
+  # cat("Identity:", blast_line$identity, "\n")
+  # cat("Alignment length:", blast_line$alignment_length, "\n")
+  # cat("Gene name:", gene_name, "\n")
+  # cat("Gene length:", gene_length, "\n\n")
+  results[i,] =c(blast_line$query,blast_line$subject, blast_line$identity, blast_line$alignment_length, gene_name, gene_length)
+}
+results = as.data.frame(results)
+plot(as.numeric(results$`Gene length:`), ylim=c(0,1000))
+
+results$`Gene name:`[which(results$`Gene length:`< 600)]
+
+library(data.table)
+
+fread(gff_files[1])
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("rtracklayer")
+library("rtracklayer")
+rtracklayer::activeView()
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("GenomicFeatures")
+browseVignettes(("GenomicFeatures"))
+
+test = GenomicFeatures::makeTxDbFromGFF(gff_files[1])
+
+# We have some different options
+# GenomicFeatures
+# rtracklayer
+# 
+
+
+#load library
+library(rtracklayer)
+test = rtracklayer::readGFFAsGRanges(gff_files[1])
+test2 = rtracklayer::readGFF(gff_files[1])
+test3 = rtracklayer::readGFFPragmas(gff_files[1])
+db = GenomicFeatures::makeTxDbFromGFF(gff_files[1])
+# Create a SQLite database
+db <- makeDbPackageFromGFF(gff_files[1], format = "gff3", type = "SQLite")
+gene_info <- select(db, keys = "KhpB", columns = c("start", "end"), keytype = "gene")
+
+# Extract the information for the gene of interest
+gene_info <- select(db, keys = "gene_name", columns = c("start", "end"))
+
+#Calculate the length of the gene
+gene_length <- nchar(gene_info$end - gene_info$start)
+
+
+# install.packages("devtools")
+devtools::install_github("thackl/thacklr")
+devtools::install_github("thackl/gggenomes")
+
+library(gggenomes)
+# Read features with it
+test5 = gggenomes::read_gff3(gff_files[1])
+results$`Alignment length:`
+
+
+# results is a dataframe
+# select rows of results where results$`Gene length:` < 900
+# define identifiers from query
+results$id = substring(results$Query, 1, as.integer(regexpr("_", results$Query)[1])-1)
+
+# Function to find the index of a sample in the penicillin table
+match_indexes = function(x) {
+  #  x is a vector of identifiers
+  ind = which(x==penicillin$samples)
+  # If there is no match, return NA
+  if(length(ind)==0) ind = NA
+  return(ind)
+  
+}
+
+results$MIC =  penicillin$penicillin_G[unlist(lapply(results$id, FUN=match_indexes))]
+
+filtered_results = filter(results,as.numeric(results$`Gene length:`) < 1100)
+
+library(ggplot2)
+library(ggpubr)
+
+filtered_results2 = na.omit(filtered_results)
+filtered_results2$`Gene length:`= as.numeric(filtered_results2$`Gene length:`)
+filtered_results2$`Alignment length:`= as.numeric(filtered_results2$`Alignment length:`)
+
+# Create a scatter plot of Gene length vs MIC
+p1 = ggplot(data = filtered_results2, aes(x = `Gene length:`, y = MIC)) + 
+  #geom_point(color = "red") +
+  #geom_smooth(method = "lm", se = FALSE) +
+  geom_hex(bins = 20, stat = "hex", aes(fill = after_stat(density))) +
+  ggtitle("Gene length vs MIC") +
+  xlab("Gene length") +
+  ylab("MIC")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12))
+
+# Create a scatter plot of Alignment length vs MIC
+p2 = ggplot(data = filtered_results2, aes(x = `Alignment length:`, y = MIC)) + 
+  #geom_point(color = "blue") +
+  geom_hex(bins = 20) +
+  #geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Alignment length vs MIC") +
+  xlab("Alignment length") +
+  ylab("MIC")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12))
+
+
+ggarrange(p1, p2, ncol = 1)
+
+
+
+ggplot(data = filtered_results2, aes(x = `Gene length:`, y = MIC)) +
+  geom_density2d() +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  ggtitle("Gene length vs MIC") +
+  xlab("Gene length") +
+  ylab("MIC")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12))
+
+ggplot(data = filtered_results2, aes(x = `Gene length:`, y = MIC)) +
+  geom_density2d() +
+  scale_x_continuous(limits = c(min(filtered_results2$`Gene length:`), max(filtered_results2$`Gene length:`)))+
+  scale_y_continuous(limits = c(min(filtered_results2$MIC), max(filtered_results2$MIC)))+
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  ggtitle("Gene length vs MIC") +
+  xlab("Gene length") +
+  ylab("MIC")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12))
+
+penicillin = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/06_Pyseer/phenotype.tsv", header=T)
+
+# results is a dataframe
+possbily_broken_elo = filter(results,   as.numeric(results$`Gene length:`) < 950)
+full_elo = filter(results,   as.numeric(results$`Gene length:`) >  950 & as.numeric(results$`Gene length:`) < 1100)
+
+#
+eloR_broken_indexes = unlist(lapply(possbily_broken_elo$id, FUN=function(x) which(x==penicillin$samples)))
+eloR_full_indexes = unlist(lapply(full_elo$id, FUN=function(x) which(x==penicillin$samples)))
+
+
+# select rows of results where results$`Gene length:` < 900
+possbily_broken_elo
+# define identifiers from query
+results$id = substring(results$Query, 1, as.integer(regexpr("_", results$Query)[1])-1)
+
+# find indexes of identifiers in penicillin# 
+eloR_broken_MIC = penicillin$penicillin_G[eloR_broken_indexes]
+eloR_full_MIC = penicillin$penicillin_G[eloR_full_indexes]
+
+paste0("Median: Broken eloR ", median(eloR_broken_MIC), " Median: full eloR:  ",  median(eloR_full_MIC))
+plot(eloR_broken_MIC)
+plot(eloR_full_MIC)
+hist(eloR_full_MIC, breaks=100)
+median(penicillin$penicillin_G)
+
+

@@ -1,0 +1,305 @@
+---
+title: "Serotypes, GPSC-clusters, and MLST types"
+editor: visual
+date: 2022-11-23
+image: Norway_historic.png
+knitr:
+  opts_chunk: 
+    comment: "#>" 
+    warning: FALSE
+    message: FALSE
+    collapse: TRUE
+    cache: FALSE
+execute:
+  echo: false
+  message: false
+---
+
+```{r remedy001, include=F}
+# library(stringr)
+# gpsc = read.csv("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/02_GPSC/GPSC_assignment/GPSC_assignment_clusters.csv")
+# gpsc_ids = str_replace(gpsc$Taxon,"_fasta", "")
+# total_data = read.table("/Users/magnusnygardosnes/Dropbox/Postdoc_pneumococcus/00_Collection_overview/total_metadata_processed_and_combined.csv")
+# total_data_ids = str_replace(total_data$fasta_name, ".fasta", "")
+# match_fun = function(x) {
+#   
+#   if(sum((x == total_data_ids),na.rm=T)>1) {
+#     print(paste0(x, " has multiple matches"))
+#   }
+#   which(x == total_data_ids)
+# }
+# matchin_inds = unlist(lapply(gpsc_ids, FUN = match_fun))
+# total_data$GPSC = rep(NA, nrow(total_data))
+# total_data$GPSC[matchin_inds] = gpsc$Cluster
+# data_kept = total_data[matchin_inds,]
+#table(data_kept$GPSC)
+```
+
+## Outline
+
+The following plots presents an analysis of GPSC clusters, serotypes and MLST for the data from Norway, Maela, Massachusetts, South Africa and USA. The categories were estimated by using the [pathogenwatch](https://pathogen.watch/).
+
+```{r, include = FALSE}
+# Load the required packages
+library(ggplot2)
+library(dplyr)
+
+file_names <- c("GPSC_massachusetts.csv", "GPSC_Maela.csv", "GPSC_SouthAfrica.csv", "GPSC_USA.csv", "GPSC_Norway_historic.csv", "GPSC_Norway_routine.csv")
+
+dir_locations = "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/02_GPSC_MLST_cgMLST_and_Serotype/"
+# List the file names
+
+file_names = paste0(dir_locations,file_names)
+# Read the files into a list of data frames
+df_list <- lapply(file_names, read.table, header = TRUE, sep = ",")
+
+# Merge the matrices in the list into a single matrix
+Metadata <- do.call(rbind, lapply(df_list, function(x) x[order(x$Genome.Name),]))
+
+# Make dataset indicators. 
+dataset = rep(c("massachusetts", "Maela", "SouthAfrica", "USA", "Norway_historic", "Norway_routine"),unlist(lapply(df_list, nrow)))
+
+# Add the dataset indicators to the gpsc_data
+Metadata$dataset = dataset
+
+# Remove the "Genome.ID" and "Version" columns from the merged matrix
+Metadata <- Metadata[, !(names(Metadata) %in% c("Genome.ID", "Version"))]
+
+
+
+#   ____________________________________________________________________________
+#   Serotype                                                                ####
+
+file_names <- c("serotype_massachusetts.csv", "serotype_Maela.csv", "serotype_SouthAfrica.csv", "serotype_USA.csv", "serotype_Norway_historic.csv", "serotype_Norway_routine.csv")
+
+dir_locations = "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/02_GPSC_MLST_cgMLST_and_Serotype/"
+# List the file names
+
+file_names = paste0(dir_locations,file_names)
+
+# Read the files into a list of data frames
+df_list <- lapply(file_names, read.table, header = TRUE, sep = ",")
+unlist(lapply(df_list, nrow))
+# Merge the matrices in the list into a single matrix
+serotype <- do.call(rbind, lapply(df_list, function(x) x[order(x$Genome.Name),]))
+
+serotype <- serotype[, !(names(serotype) %in% c("Genome.ID", "Version"))]
+nrow(serotype)
+Metadata = merge(Metadata, serotype, by = "Genome.Name")
+
+
+#   ____________________________________________________________________________
+#   MLST                                                                    ####
+
+file_names <- c("mlst_massachusetts.csv", "mlst_Maela.csv", "mlst_SouthAfrica.csv", "mlst_USA.csv", "mlst_Norway_historic.csv", "mlst_Norway_routine.csv")
+
+dir_locations = "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/02_GPSC_MLST_cgMLST_and_Serotype/"
+# List the file names
+
+file_names = paste0(dir_locations,file_names)
+
+# Read the files into a list of data frames
+df_list <- lapply(file_names, read.table, header = TRUE, sep = ",")
+
+# Merge the matrices in the list into a single matrix
+mlst <- do.call(rbind, lapply(df_list, function(x) x[order(x$Genome.Name),]))
+
+mlst <- mlst[, !(names(mlst) %in% c("Genome.ID", "Version"))]
+
+mlst <- mlst[,c("Genome.Name", "ST")]
+
+Metadata = merge(Metadata, mlst, by = "Genome.Name")
+
+#The ST column is weird. Set all entries with longer than 10 characters to NA
+Metadata$ST[nchar(Metadata$ST) > 10] <- NA
+
+write.table(Metadata,"~/Dropbox/Postdoc_pneumococcus/00_Collection_overview/assigned_metadata.csv")
+# My data looks like:
+#   
+#   Genome.Name       Strain         dataset Serotype   ST
+# 1       08-04           18 Norway_historic       14    9
+# 2       08-04           18 Norway_historic       14    9
+# 3       08-04           18 Norway_historic       14    9
+# 4       08-04           18 Norway_historic       14    9
+# 5        1-83 Not assigned Norway_historic      32F <NA>
+# 6        1-83 Not assigned Norway_historic      32F <NA>
+#   
+# For each unique value in dataset, can you make piecharts of the strain strain, Serotype column and the ST column?
+
+
+```
+
+```{r}
+#
+# My data looks like:
+#   
+#   Genome.Name       Strain         dataset Serotype   ST
+# 1       08-04           18 Norway_historic       14    9
+# 2       08-04           18 Norway_historic       14    9
+# 3       08-04           18 Norway_historic       14    9
+# 4       08-04           18 Norway_historic       14    9
+# 5        1-83 Not assigned Norway_historic      32F <NA>
+# 6        1-83 Not assigned Norway_historic      32F <NA>
+#   
+# For each unique value unique value in the dataset column, can you make piecharts of the Strain column, Serotype column and the ST column?
+
+# My data looks like:
+#   
+#   Genome.Name       Strain         dataset Serotype   ST
+# 1       08-04           18 Norway_historic       14    9
+# 2       08-04           18 Norway_historic       14    9
+# 3       08-04           18 Norway_historic       14    9
+# 4       08-04           18 Norway_historic       14    9
+# 5        1-83 Not assigned Norway_historic      32F <NA>
+# 6        1-83 Not assigned Norway_historic      32F <NA>
+#   
+# For each unique value unique value in the dataset column, if there are fewer than 10 occurences of strain, serotype and ST, given that dataset, can you set the value of strain, serotype and ST to "other"?
+
+
+# Metadata_grouped now looks like: 
+#   
+# Metadata_grouped
+# # A tibble: 11,770 × 5
+# # Groups:   dataset [5]
+#    Genome.Name Strain dataset         Serotype ST   
+#    <chr>       <chr>  <chr>           <chr>    <chr>
+#  1 08-04       18     Norway_historic 14       9    
+#  2 08-04       18     Norway_historic 14       9    
+#  3 08-04       18     Norway_historic 14       9    
+#  4 08-04       18     Norway_historic 14       9    
+#  5 1-83        18     Norway_historic 14       9    
+#  6 1-83        18     Norway_historic 14       9    
+#  7 1-83        18     Norway_historic 14       9    
+#  8 1-83        18     Norway_historic 14       9    
+#  9 1-84        18     Norway_historic 14       9    
+# 10 1-84        18     Norway_historic 14       9    
+# 
+# Can you make a piechart of strain, serotype and st for each unique value in dataset?
+
+
+
+library(plotly)
+
+make_barplot <- function(data, column, dataset) {
+  #data=Metadata; column="ST"; dataset="Norway_historic";
+  #Set plot title
+  
+  plot_title = dataset
+  #Remove underscore:
+  plot_title = gsub("_", " ", plot_title)
+  
+  # Select the rows of data with the specified dataset value
+  data_subset <- data[data$dataset == dataset,]
+  
+  # Create a table of the values in the specified column
+  value_counts <- table(data_subset[, column])
+  
+  # Sort the table and reduce it to the top 50 entries
+  value_counts <- sort(value_counts,decreasing = T)
+  value_counts <- head(value_counts, 50)
+  
+  # Define the original color vector
+colors <- hcl(h = seq(15, 375, length = length(value_counts)),
+              l = 65,
+              c = 100)[order(value_counts)]
+
+# Calculate the number of repetitions needed to match the length of the data
+num_reps <- ceiling(length(value_counts) / length(colors))
+
+# Repeat the colors in the original color vector
+colors <- rep(colors, num_reps)
+  
+  
+  # Determine the maximum y-axis value
+  max_y_value <- max(value_counts) * 1.1
+  
+  # Create a bar plot using the value counts
+   ggplot(data.frame("x" = names(value_counts), "y" = as.numeric(value_counts)), aes(reorder(x, -y),y,fill=x))+
+  geom_bar(stat = "identity", position="dodge")+
+    scale_fill_manual(values = colors)+
+    theme_bw()+
+   theme(legend.position = "none", plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 60, hjust = 1, size = 8))+
+    labs(fill="")+scale_y_continuous(expand=c(0,0),limits = c(0,max_y_value))+scale_x_discrete(expand=c(0,0))+ggtitle(plot_title)+
+    ylab("Counts")+
+    xlab(column)
+}
+
+make_interactive_barplot <- function(data, column, dataset) {
+  # Create the ggplot bar plot
+  ggplot_plot <- make_barplot(data, column, dataset)
+  
+  # Convert the ggplot plot to an interactive plotly plot
+  ggplotly(ggplot_plot)
+}
+#
+```
+
+## GPSC clusters
+
+```{r}
+library(shiny)
+
+#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
+#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
+# # Create the tabset panel
+
+tabsetPanel(
+  tabPanel("Norway historic", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")),
+  tabPanel("Norway routine", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")),
+  tabPanel("Maela", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")),
+  tabPanel("Massachusetts", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")),
+  tabPanel("SouthAfrica", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")),
+  tabPanel("USA", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")),
+  type="pills"
+)
+```
+
+## Serotypes
+
+```{r}
+library(shiny)
+
+#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
+# # Create the tabset panel
+
+tabsetPanel(
+  tabPanel("Norway historic", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Norway_historic")),
+  tabPanel("Norway routine", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Norway_routine")),
+  tabPanel("Maela", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Maela")),
+  tabPanel("Massachusetts", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")),
+  tabPanel("SouthAfrica", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "SouthAfrica")),
+  tabPanel("USA", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "USA")),
+  type="pills"
+)
+```
+
+## MLST
+
+```{r}
+library(shiny)
+
+#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
+# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
+# # Create the tabset panel
+
+tabsetPanel(
+  tabPanel("Norway historic", make_interactive_barplot(data = Metadata, column = "ST", dataset = "Norway_historic")),
+  tabPanel("Norway routine", make_interactive_barplot(data = Metadata, column = "ST", dataset = "Norway_routine")),
+  tabPanel("Maela", make_interactive_barplot(data = Metadata, column = "ST", dataset = "Maela")),
+  tabPanel("Massachusetts", make_interactive_barplot(data = Metadata, column = "ST", dataset = "massachusetts")),
+  tabPanel("SouthAfrica", make_interactive_barplot(data = Metadata, column = "ST", dataset = "SouthAfrica")),
+  tabPanel("USA", make_interactive_barplot(data = Metadata, column = "ST", dataset = "USA")),
+  type="pills"
+)
+```

@@ -1,0 +1,42 @@
+# Author: Magnus Nygård Osnes
+# Date: 19.01.2023
+
+
+# library for reading fasta files
+library(seqinr)
+
+# An input file may look like this: 
+
+# >ERR039560
+# MVVFTGSTVEEAIQKGLKELDIPRMKAHIKVISREKKGFLGLFGKKPAQVDIEAISETTVV
+# >ERR039561
+# MVVFTGSTVEEAIQKGLKELDIPRMKAHIKVISREKKGFLGLFGKKPAQVDIEAISETTVV
+# >ERR039562
+# MVVFTGSTVEEAIQKGLKELDIPRMKAHIKVISREKKGFLGLFGKKPAQVDIEAISETTVV
+
+
+# function to extract protein structure and sequence identity information from fasta file
+extract_structure_sequence <- function(fasta_file) {
+  
+  # read fasta file
+  fasta_sequences <- read.fasta(fasta_file)
+  
+  # create data frame to store extracted information
+  structure_sequence_data <- data.frame(NA, nrow=length(fasta_sequences), ncol=3)
+  colnames(structure_sequence_data) <- c("Identity","n_amino_acids", "amino_acid_sequence")
+  
+  # loop through each sequence in the fasta file
+  for(i in 1:length(fasta_sequences)) {
+    # extract name of sequence
+    sequence_name <- names(fasta_sequences)[i]
+    # extract sequence 
+    sequence <- as.character(fasta_sequences[[i]])
+    n_amino_acids <- length(sequence)
+    sequence <- paste(sequence, collapse="")
+    # add extracted information to data frame
+    structure_sequence_data[i,] <- cbind(sequence_name, n_amino_acids, sequence)
+  }
+  
+  # return data frame
+  return(structure_sequence_data)
+}

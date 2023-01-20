@@ -1,0 +1,32 @@
+{
+    "id": "0B43A77A",
+    "path": "~/Dropbox/Github/Quarto_website/posts/03_pbps/pbps.qmd",
+    "project_path": "posts/03_pbps/pbps.qmd",
+    "type": "quarto_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1672752778025.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "rmdVisualMode": "false",
+        "rmdVisualWrapConfigured": "true",
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "docOutlineVisible": "0",
+        "rmdVisualCollapsedChunks": "",
+        "cursorPosition": "36,39",
+        "scrollLine": "0",
+        "rmdVisualModeLocation": "2:2686.39990234375"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1672753228,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1672753228661,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,40 @@
+#   Author: Magnus Nygard Osnes
+#  Date: 2019-05-15
+
+
+blast_eloR_full <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/blast_output_eloR_full_reverse.txt", header=TRUE, sep="\t", comment.char="#")
+
+# Add column names
+colnames(blast_eloR_full) <- c("query", "subject", "identity", "alignment_length", "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+
+
+# Extract contig number
+blast_eloR_full$contig_number<- gsub("^.*?_(\\d+)_.*", "\\1", blast_eloR_full$query)
+blast_eloR_full$contig_number<- gsub("^.*?_(\\d+)_.*", "\\1", blast_eloR_full$query)
+
+# Extract query_id
+blast_eloR_full$query_id <- gsub("^(.*?)_.*", "\\1", blast_eloR_full$query)
+
+
+# Read fasta file locations
+fasta_files = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Om_samlingen/input.txt")
+
+# Replace file ending ".fasta" with ".gff3" from fasta_files
+gff_files = gsub(".fasta", ".gff3", fasta_files$V1)
+gff_files_identifiers = gsub(".gff3", "", gff_files); gff_files_identifiers = gsub(".*/", "", gff_files_identifiers) 
+
+# Find the index of the query_id in the table of gff files
+inds = unlist(lapply(blast_eloR_full$query_id, function(x) which(x==gff_files_identifiers)))
+
+# Extract the file locations
+blast_eloR_full$file_location = gff_files[inds]
+    
+
+# Pseudo code:
+# Open the gff3 file
+# Find the overlap between q_start, q_end
+
+library(ape)
+
+gff3 = read.gff(blast_eloR_full$file_location[2],GFF3 = T)
+

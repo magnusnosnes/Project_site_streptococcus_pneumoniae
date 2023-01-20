@@ -1,0 +1,135 @@
+[
+  {
+    "objectID": "posts/04_GWAS/GWAS.html",
+    "href": "posts/04_GWAS/GWAS.html",
+    "title": "Conditional GWAS",
+    "section": "",
+    "text": "Here we present the results of a genome-wide association study (GWAS) conducted using pyseer (John A. Lees et al. 2018), a tool for identifying genetic associations with complex traits. The GWAS was performed using the linear mixed effects model such that the minimum inhibitory concentration (MIC) of Penicillin G: \\[\\mathbf{y} \\sim \\mathbf{W} \\mathbf{a} + \\mathbf{X} \\mathbf{b} + \\mathbf{K} \\mathbf{u} +\\epsilon\\]\nwith\n\\[\n\\begin{align*}\n\\mathbf{u} \\sim \\mathcal{N} \\left( 0, \\sigma^2_g \\mathbf{G} \\right), \\quad &\\mathbf{\\epsilon} \\sim \\mathcal{N} \\left( 0, \\sigma^2_g \\mathbf{I} \\right)\n\\end{align*}\n\\]\nWhere \\(\\mathbf{G}\\) is the similarity matrix that was obtained from the phylogenetic relationship of the samples, and \\(\\mathbf{I}\\) is the identity matrix.\n\n\nTable 1: Information about the GWAS model\n\n\nSymbol\nMeaning\n\n\n\n\n𝑦\nA vector containing the MIC data for each sample.\n\n\n𝑊\nA design matrix containing the conditional covariates: We used categorical variables for the variants of pencillin binding proteins pbp1a, pbp2b and pbp2x, coded according to the allele scheme proposed in (Y. Li et al. 2016), and benchmarked in (Y. Li et al. 2017). The allele codes were obtained by running the Pathogenwatch pipeline. We also included the study the data was obtained as a categorical variable, to capture differences in MIC measurement protocols.\n\n\n𝑎\nFixed effects for the covariates.\n\n\n𝑋\nA design matrix containing the presence or absence of the unitigs.\n\n\n𝑏\nFixed effects of the unitigs.\n\n\n𝐾\nThe similarity matrix between all pairs of samples. We used a neighbor-joining phylogeny estimated using PopPUNK (John A. Lees et al. 2019).\n\n\n𝑢\nRandom effects for each row of the kinship matrix.\n\n\nε\nNormally distributed error terms.\n\n\n\n\nThus we assume that the MIC can be predicted by the covariates with the correlation structure implied by the phylogenetic relationship of the samples. If we take the expectation of the equation we obtain \\[E(\\mathbf{y}) \\sim \\mathbf{W} \\mathbf{a} + \\mathbf{X} \\mathbf{b} + \\mathbf{K} \\mathbf{u} +\\epsilon\\] \\[ = E(\\mathbf{W} \\mathbf{a} + \\mathbf{X} \\mathbf{b} + \\mathbf{K} \\mathbf{u} +\\epsilon)\\] \\[ = \\mathbf{W} \\mathbf{a} + \\mathbf{X} \\mathbf{b}\\] and variance \\[V(\\mathbf{y}) = V(\\mathbf{W} \\mathbf{a} + \\mathbf{X} \\mathbf{b} + \\mathbf{K} \\mathbf{u} +\\epsilon)\\] \\[\n\\begin{aligned}\nV(\\mathbf{y}) = V(\\mathbf{W} \\mathbf{a} + \\mathbf{X} \\mathbf{b} + \\mathbf{K} \\mathbf{u} +\\epsilon) \\\\\n= V(\\mathbf{K} \\mathbf{u} + \\epsilon) \\\\\n= V(\\mathbf{K} \\mathbf{u}) + V(\\epsilon) \\\\\n= \\sigma^2_g \\mathbf{G} + \\sigma^2_g \\mathbf{I}\n\\end{aligned}\n\\]\n\n\n\nWe filtered the unitigs based on a minimum allele frequency (MAF) between [0.01, 0.99] meaning that the unitigs have to be present in more than 1% and less than 99% of the isolates. We used the number of patterns in the unitigs to define a significance threshold of the p-values of the unitigs. We detected 974212 unique patterns translating to a significance threshold of \\(p = 5.13\\cdot 10^{-08}\\). All downstream results and visualizations were reported for unitigs with a smaller p-value than the threshold. Many of these hits were then annotated using the nomenclature of Bakta (Schwengers et al. 2021). The annotations can be looked up on NCBI for further information."
+  },
+  {
+    "objectID": "posts/04_GWAS/GWAS.html#significant-hits-ordered-by-average-effect-size",
+    "href": "posts/04_GWAS/GWAS.html#significant-hits-ordered-by-average-effect-size",
+    "title": "Conditional GWAS",
+    "section": "Significant hits ordered by average effect size",
+    "text": "Significant hits ordered by average effect size\n\n\n\n\n\n\n\n\n\nFigure 1: Plot of unitigs mapped to annotated regions of references and assemblies. This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value.\n\n\n\n\n\nSignificant hits ordered by minor allele frequency (MAF)\n\n\n\n\n\nFigure 2: Plot of unitigs mapped to annotated regions of references and assemblies. This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value."
+  },
+  {
+    "objectID": "posts/04_GWAS/GWAS.html#significant-hits-ordered-by-minor-allele-frequency-maf",
+    "href": "posts/04_GWAS/GWAS.html#significant-hits-ordered-by-minor-allele-frequency-maf",
+    "title": "Conditional GWAS",
+    "section": "Significant hits ordered by minor allele frequency (MAF)",
+    "text": "Significant hits ordered by minor allele frequency (MAF)\n\n\n\n\n\nFigure 2: Plot of unitigs mapped to annotated regions of references and assemblies. This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value."
+  },
+  {
+    "objectID": "posts/04_GWAS/GWAS.html#interactive-plot-of-unitigs-mapped-to-genes",
+    "href": "posts/04_GWAS/GWAS.html#interactive-plot-of-unitigs-mapped-to-genes",
+    "title": "Conditional GWAS",
+    "section": "Interactive plot of unitigs mapped to genes",
+    "text": "Interactive plot of unitigs mapped to genes\nIn the figures below the unitigs are mapped to reference genomes and. As references we used multiple genomes, and additionally we annotated our\n\nSignificant hits ordered by effect sizeSignificant hits ordered by MAF\n\n\n\n\n\n\n\nFigure 3: Interactive plot of unitigs mapped to annotated regions of references and assemblies. This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value.\n\n\n\n\n\n\n\n\n\n\nFigure 4: Interactive plot of unitigs mapped to annotated regions of references and assemblies. This scatter plot shows the relationship between the average minor allele frequency (MAF) and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average effect size of the genes. Points are labeled with gene name. The plot highlights genes that have high MAF value and large -log10(p-value) as well as high unitig count and large average effect size."
+  },
+  {
+    "objectID": "posts/04_GWAS/GWAS.html#summary-of-annotated-regions-matching-the-unitigs-table",
+    "href": "posts/04_GWAS/GWAS.html#summary-of-annotated-regions-matching-the-unitigs-table",
+    "title": "Conditional GWAS",
+    "section": "Summary of annotated regions matching the unitigs (Table)",
+    "text": "Summary of annotated regions matching the unitigs (Table)\n\n\n\n\n\n\nFigure 5: Gene hits Annotated regions of mapped unitigs. The table summarizes the locations of unitigs in the genome, including the gene annotated region (gene), the number of unitigs in that region (HITS), the highest observed p-value (MAXP), the average minimum allele frequency (AVG_MAF), and the average effect size (AVG_BETA) of unitigs within the region. The table also includes a column (NAMES_FOR_DISPLAY) to indicate regions that have common gene names, which match the names in the interactive figures above."
+  },
+  {
+    "objectID": "posts/04_GWAS/GWAS.html#unitig-sequences-significance-effect-size-and-heritability-table",
+    "href": "posts/04_GWAS/GWAS.html#unitig-sequences-significance-effect-size-and-heritability-table",
+    "title": "Conditional GWAS",
+    "section": "Unitig sequences, significance, effect size and heritability (Table)",
+    "text": "Unitig sequences, significance, effect size and heritability (Table)\n\n\n\n\n\n\nFigure 6: Unitig sequences. The table displays various characteristics of the significant unitigs including allele frequency (AF), p-value (filter-pvalue), likelihood (lrt-pvalue), effect size (beta), estimated standard error of the effect size (beta-std-err), estimated heritability of the unitig sequence (variant_h2), and the annotated region in which the unitig is found (annotation) as well as the nearest upstream and downstream annotated regions (gene-upstream gene-downstream gene)."
+  },
+  {
+    "objectID": "posts/04_GWAS/GWAS.html#unitigs-mapped-to-reference-genomes",
+    "href": "posts/04_GWAS/GWAS.html#unitigs-mapped-to-reference-genomes",
+    "title": "Conditional GWAS",
+    "section": "Unitigs mapped to reference genomes",
+    "text": "Unitigs mapped to reference genomes\nIn total we extracted 2527 significant unitigs. We mapped these unitigs to different reference genomes, summarized in the table below. Streptococcus pneumoniae has a large pan-genome, and none of the references contain all of the unitigs. Note that a high fraction of the unitigs were found in ST556, which represents a sequence from a multidrug-resistant isolate from an otitis media patient (G. Li et al. 2012).\n\n\nTable 2: Information about the reference strains\n\n\nReference strain\nDescription\n\n\n\n\nATCC70066\nMultidrug-Resistant Pandemic Clone Streptococcus pneumoniae. 885 out of 2527 unitigs were mapped to this genome. https://doi.org/10.1128/JB.01343-08\n\n\nHu17\nhigh-level beta-lactam resistance and penicillin sensitive phenotype. 719 out of 2527 unitigs were mapped to this genome. https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_002076835.1/\n\n\nEF3030\nA serotype 19F isolate that colonizes the nasopharynx of mice while being mostly noninvasive. 1359 out of 2527 unitigs were mapped to this genome. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6509521/\n\n\nST556\nA Multidrug-Resistant Isolate from an Otitis Media Patient. 2147 out of 2527 unitigs were mapped to this genome. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370858/\n\n\nTIGR4\nFrom the paper: The acquisition of clinically relevant amoxicillin resistance in Streptococcus pneumoniae requires ordered horizontal gene transfer of four loci. 774 out of 2527 unitigs were mapped to this genome. https://pubmed.ncbi.nlm.nih.gov/35877768/\n\n\nSN75752\nFrom the paper: The acquisition of clinically relevant amoxicillin resistance in Streptococcus pneumoniae requires ordered horizontal gene transfer of four loci. 748 out of 2527 unitigs were mapped to this genome. https://pubmed.ncbi.nlm.nih.gov/35877768/\n\n\n\n\n\n\n\nATCC700669Hu17EF3030ST556TIGR4SN75752\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 7: Unitigs mapped to various reference genomes. The reference strains used for the mapping are described in the table above. The data displayed when hovering over the points in the figure represents the annotation attributes extracted from the genes that overlap with the starting position of the unitig (basepair position). It’s noteworthy that the “product” and “gene” attributes can provide valuable insights into the function of the genomic regions that the unitigs overlap with."
+  },
+  {
+    "objectID": "posts/03_pbps/pbps.html",
+    "href": "posts/03_pbps/pbps.html",
+    "title": "Penicillin binding proteins",
+    "section": "",
+    "text": "PBPs are a type of protein found in bacteria that bind to penicillin, a type of antibiotic. PBPs play a key role in the synthesis of the bacterial cell wall, and when they bind to penicillin, they can interfere with this process. As a result, the growth and division of the bacterial cells can be impaired, making the antibiotic effective at killing or inhibiting the growth of the bacteria. It is important to note that some bacteria can develop resistance to antibiotics by producing PBPs that are resistant to the effects of the antibiotic. In these cases, the antibiotic may not be effective at killing or inhibiting the growth of the bacteria, making it important to use a different type of antibiotic or to use a combination of antibiotics to effectively treat the infection.\nThe PBPs presented in this document were determined by running Pathogenwatch, which uses a machine learning procedure PBP typing scheme . The visualization provides a representation of the distribution and abundance of the different types of PBPs in our collection.\n\n\n\n\nNorway RoutineNorway historicMaelaSouth AfricaMassachusettsUSA"
+  },
+  {
+    "objectID": "posts/01_data_overview/data_overview.html",
+    "href": "posts/01_data_overview/data_overview.html",
+    "title": "An overview of the data",
+    "section": "",
+    "text": "The goal of this project is to determine mutations and factors that are involved in penicillin resistance. We have collected a data set with isolates that are susceptible, intermediate resistant and resistant to Penicillin G. We included isolates that have been analysed in previous studies in addition to new isolates from routine sequencing in Norway. In addition, we sequenced historic isolates that have been stored at the Norwegian Institute of public health. In total the collection consists of 9316 genomes, with sampling dates and antibiotic resistance profiles summarized below."
+  },
+  {
+    "objectID": "posts/01_data_overview/data_overview.html#collection-dates-individual-countries",
+    "href": "posts/01_data_overview/data_overview.html#collection-dates-individual-countries",
+    "title": "An overview of the data",
+    "section": "Collection dates individual countries",
+    "text": "Collection dates individual countries\n\n\n\n\n\nNorway routine\n\n\nNorway historic\n\n\nMaela\n\n\nSouth Africa\n\n\nMassachusetts\n\n\nUSA"
+  },
+  {
+    "objectID": "posts/01_data_overview/data_overview.html#collection-dates-all-countries",
+    "href": "posts/01_data_overview/data_overview.html#collection-dates-all-countries",
+    "title": "An overview of the data",
+    "section": "Collection dates all countries",
+    "text": "Collection dates all countries"
+  },
+  {
+    "objectID": "posts/01_data_overview/data_overview.html#mic-values-individual-countries",
+    "href": "posts/01_data_overview/data_overview.html#mic-values-individual-countries",
+    "title": "An overview of the data",
+    "section": "MIC values individual countries",
+    "text": "MIC values individual countries\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nSouth Africa\n\n\nMassachusetts\n\n\nUSA"
+  },
+  {
+    "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html",
+    "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html",
+    "title": "Serotypes, GPSC-clusters, and MLST types",
+    "section": "",
+    "text": "The following plots presents an analysis of GPSC clusters, serotypes and MLST for the data from Norway, Maela, Massachusetts, South Africa and USA. The categories were estimated by using the pathogenwatch."
+  },
+  {
+    "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#gpsc-clusters",
+    "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#gpsc-clusters",
+    "title": "Serotypes, GPSC-clusters, and MLST types",
+    "section": "GPSC clusters",
+    "text": "GPSC clusters\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nMassachusetts\n\n\nSouthAfrica\n\n\nUSA"
+  },
+  {
+    "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#serotypes",
+    "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#serotypes",
+    "title": "Serotypes, GPSC-clusters, and MLST types",
+    "section": "Serotypes",
+    "text": "Serotypes\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nMassachusetts\n\n\nSouthAfrica\n\n\nUSA"
+  },
+  {
+    "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#mlst",
+    "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#mlst",
+    "title": "Serotypes, GPSC-clusters, and MLST types",
+    "section": "MLST",
+    "text": "MLST\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nMassachusetts\n\n\nSouthAfrica\n\n\nUSA"
+  },
+  {
+    "objectID": "posts/05_Sequences_of_interest/SOI.html",
+    "href": "posts/05_Sequences_of_interest/SOI.html",
+    "title": "Sequences of interest",
+    "section": "",
+    "text": "In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is KhpB, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS. It was found that when pbp2b is transferred to a strain, EloR acquires a 50 bp deletion.\nTo understand the impact of this deletion on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies. A shorter gene length would indicate the presence of the 50 bp deletion or other modifications to the protein.\n\n\n\n\n\n\n\n\n\n\nFigure 1: Blast search of assemblies against the full eloR sequence. The figure shows the relationship between the gene length and alignment length of the protein KhpB/eloR and the Minimum Inhibitory Concentration (MIC) of the isolates in our database. Panel A displays a scatter plot of the gene length and MIC, with the points plotted in red. Panel B displays a scatter plot of the alignment length and MIC, with the points plotted in blue.\n\n\n\n\nAs seen in Figure 1, there is no apparent correlation between the gene length of KhpB and the observed penicillin MIC. In fact, we see that most of the high MIC levels is observed around the normal gene length (approximately 986 base pairs).\n\n\n\n\n\n\nNext we searched directly for the protein “KhpB” in the annotated assemblies and inspected the length of the amino acid sequence. For example, if the amino acid sequence of any was significantly shorter than the typical distribution length, it may suggest a potential correlation with increased MIC.\nIn 26 of the annotated assemblies, KhpB was split and the first domain of the KhpB protein was annotated as “jag”.\n\n\n\n\n\nFigure 2: Distribution of Penicillin G resistance KhpB and jag annotations. The x-axis represents the gene of interest and the y-axis represents the resistance level to Penicillin G.\n\n\n\n\nFigure 2 shows that most of the high penicillin resistance levels are in the KhpB annotations. Next we look at the gene length:\n\n\n\n\n\nFigure 3: The relationship between the length of the gene in terms of amino acids and the resistance levels to Penicillin G. The x-axis represents the length of the gene in terms of amino acids, the y-axis represents the resistance level to Penicillin G. The color of the points indicates if the annotation was KhpB was split to jag or just annotated khpB.\n\n\n\n\nFigure 3 shows that most of the high penicillin resistance levels are observed for normal length variants of the KhpB protein. Most of the high MIC isolates have 328 amino acids in KhpB.\n\n\n\nIn this analysis, we studied specific genes of interest identified by our colleagues at NMBU, focusing on the protein KhpB and its correlation with pbp2b, a protein known to play a role in increasing Minimum Inhibitory Concentration (MIC). We set up a BLAST database for eloR, extracted matches and the gene length of the match in the respective assemblies, and searched for the protein “KhpB” in annotated assemblies to inspect the length of the amino acid sequence. Our results showed that there is no clear relationship between the gene length of KhpB and the observed penicillin MIC, and most of the high MIC levels were observed around the normal gene length. Additionally, we found that most of the high penicillin resistance levels were in the KhpB annotations, with most high MIC isolates having 328 amino acids in KhpB."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Disentangling penicillin resistance and compensatory adaption in pneumococci",
+    "section": "",
+    "text": "Sequences of interest\n\n\n\n\n\n\n\n\n\n\n\n\nJan 11, 2023\n\n\n\n\n\n\n  \n\n\n\n\nConditional GWAS\n\n\n\n\n\n\n\n\n\n\n\n\nJan 3, 2023\n\n\n\n\n\n\n  \n\n\n\n\nPenicillin binding proteins\n\n\n\n\n\n\n\n\n\n\n\n\nDec 14, 2022\n\n\n\n\n\n\n  \n\n\n\n\nSerotypes, GPSC-clusters, and MLST types\n\n\n\n\n\n\n\n\n\n\n\n\nNov 23, 2022\n\n\n\n\n\n\n  \n\n\n\n\nAn overview of the data\n\n\n\n\n\n\n\n\n\n\n\n\nNov 4, 2022\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Penicillin resistance is a major concern in the field of microbiology, as it poses a threat to the effectiveness of one of the most commonly used antibiotics. Pneumococci, a type of bacteria that can cause pneumonia, are particularly known for their ability to develop resistance to penicillin. In this website, we explore the latest research on the mechanisms of penicillin resistance in pneumococci and how it is related to compensatory adaptation. We combine the fields of genomics and molecular microbiology to better understand these complex processes and their implications for the treatment of bacterial infections.\nThis project will focus specifically on penicillin binding proteins (PBPs), the mechanisms by which they function, and mutations that alter their minimum inhibitory concentrations (MICs). PBPs are enzymes that are responsible for the synthesis of the bacterial cell wall, and they are the primary target of penicillin and other beta-lactam antibiotics. Mutations in the genes encoding these proteins can lead to changes in their structure and function, allowing the bacteria to become resistant to the antibiotics. By studying the genetic and molecular basis of these mutations, we can gain a deeper understanding of the mechanisms of penicillin resistance in pneumococci and develop more effective strategies for combating these infections.\n\nThe research presented on this website is a collaboration between the University of Oslo, the Norwegian Institute of Public Health, and the Norwegian University of Life Sciences. Our team brings together experts in the fields of genomics, molecular microbiology, and public health, who are dedicated to advancing our understanding of antibiotic resistance and improving the treatment of bacterial infections. We are grateful for the support of these institutions, which have provided us with the resources and expertise necessary to conduct this important research."
+  }
+]

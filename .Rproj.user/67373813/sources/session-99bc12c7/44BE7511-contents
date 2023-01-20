@@ -1,0 +1,241 @@
+#Load packages
+library(stringr)
+library(tidyr)
+library(manhattanly)
+library(ggplot2)
+library(plotly)
+
+# #Read filname and annotation as command line arguments.
+# args <- commandArgs(trailingOnly = TRUE)
+# 
+# #Variable names
+# filename = args[1]
+# annotation_name = args[2]
+
+#Functions needed in this script: 
+manhattan_data_from_mapping = function(filename) {
+  #Example file name: "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/ATCC700669_unitigs.plot"
+  # Read the file into a data frame
+  manhattan_frame <- read.table(filename, header = TRUE, sep = "\t")
+  
+  # Split the data in the third column on ".."
+  manhattan_frame$minLOG10.P. = as.character(manhattan_frame$minLOG10)
+  
+  # Define the splitter function
+  splitter <- function(x) {
+    # Split the character vector by two periods with no spaces
+    split_vector <- strsplit(gsub("\\.\\.", " ", x), " ")
+    
+    # Return the split vector
+    return(split_vector)
+  }
+  
+  # Split the minLOG10.P column of the manhattan_frame dataframe using the splitter function
+  split_vector <- lapply(manhattan_frame$minLOG10.P.,FUN = splitter)
+  
+  start_stop <- data.frame(start=unlist(lapply(1:length(split_vector), FUN = function(x) split_vector[[x]][[1]][1])), 
+                           end=unlist(lapply(1:length(split_vector), FUN = function(x) split_vector[[x]][[1]][2])))
+  
+  manhattan_frame$start = start_stop$start
+  manhattan_frame$stop = start_stop$end
+  manhattan_frame = manhattan_frame[,c(1,4,6,7)]
+  
+  names(manhattan_frame) <- c("seqID", "log10(p)", "start", "stop")
+  
+  return(manhattan_frame)
+}
+
+extract_gene_from_annotation = function(starts, annotation) {
+  #Example start argument: starts = manhattan_frame$stars
+  #Starts is the basepair positions of the unitig match in the corresponding reference genome.
+  
+  genes = c()
+  
+  for(j in 1:length(starts)) {
+    
+    #Add a progress bar for the j-loop.
+    #cat(round(j/length(starts),2)*100,"%\r")
+    
+    start = starts[j]
+    
+    # Find rows where the start position is within the bounds of the annotation
+    upstream = start <= annotation$end
+    downstream = start >= annotation$start
+    
+    # Find the indices of rows that meet both conditions
+    inds = which(upstream & downstream) #remove region as it is always the first match
+    
+    # Find the attributes of the selected rows
+    annot <- annotation$attributes[inds]
+    
+    # Initialize ID and gene variables to NULL
+    ID <- NULL
+    gene <- NULL
+    
+    # Split the attributes into a list of tags
+    
+    
+    for(i in 1:length(annot)) {
+      tags <- strsplit(annot, ";")[[i]]
+      
+      # Iterate over the tags
+      for (tag in tags) {
+        # Split the tag into its key and value
+        parse_tag <- strsplit(tag, "=")[[1]]
+        #on.exit(browser())
+        # If the tag has a key and value
+        if (length(parse_tag) == 2) {
+          # If the key is "gene", assign the value to the gene variable and break the loop
+          if (parse_tag[1] == "gene") {
+            gene <- parse_tag[2]
+            break
+            # If the key is "ID" and the ID variable is NULL, assign the value to the ID variable
+          } else if (parse_tag[1] == "ID" && is.null(ID)) {
+            ID <- parse_tag[2]
+          }
+        }
+      }
+    }
+    
+    # If the gene variable is NULL, assign the ID variable to it if it is not NULL, or an empty string if it is NULL
+    if (is.null(gene)) {
+      if (!is.null(ID)) {
+        gene <- ID
+      } else {
+        gene <- ""
+      }
+    }
+    if(gene=="dnaN") {
+      browser()
+    }
+    genes = c(genes, gene) #Add found gene. 
+  }
+  
+  return(genes)
+  
+}
+
+extract_all_attributes_from_annotation = function(starts, annotation) {
+  
+  #starts = manhattan_frame$start
+  
+  genes = list()
+  
+  for(j in 1:length(starts)) {
+    
+    #progress bar.
+    #cat(round(j/length(starts),2)*100,"%\r")
+    
+    start = starts[j]
+    # Find rows where the start position is within the bounds of the annotation
+    upstream = start <= annotation$end
+    downstream = start >= annotation$start
+    
+    # Find the indices of rows that meet both conditions
+    inds = which(upstream & downstream) #remove region as it is always the first match
+    
+    
+    # If there is more than one row with a possible type, find the indices of rows with type "gene"
+    # and update the inds variable to only include these rows
+    #if(length(possible_types)>1){
+    #ind_select = which(possible_types=="CDS")
+    #inds = inds[ind_select]
+    #}
+    
+    
+    # Find the attributes of the selected rows
+    annot <- annotation$attributes[inds]
+    
+    # Initialize ID and gene variables to NULL
+    ID <- NULL
+    gene <- NULL
+    
+    # Split the attributes into a list of tags
+    
+    attributes = c()
+    for(i in 1:length(annot)) {
+      #Store all dags 
+      attributes = c(attributes,strsplit(annot, ";")[[i]])
+      
+    }
+    genes[[j]]=paste0(attributes, collapse=" <br> ")
+  }
+  return(genes)
+}
+
+find_gene = function(annotation, gene) {
+  ind_found = which(str_detect(annotation$attributes, gene) & annotation$type=="gene")
+  start = annotation$start[ind_found]
+  stop = annotation$end[ind_found]
+  return(c(start, stop))
+}
+
+manhattanplot = function(the_data, pbp1A_start, pbp1A_end, pbp2A_start, pbp2A_end, pbpX_start, pbpX_end,
+                         pbp1B_start, pbp1B_end, pbp2B_start, pbp2B_end) {
+  ggplot(data=the_data, aes(text=gene)) +
+    geom_rect(aes(xmin = pbp1A_start, xmax = pbp1A_end, ymin = 0, ymax = 0.5, Annotation_region = "pbp1A"), fill="forestgreen") +
+    geom_rect(aes(xmin= pbp2A_start, xmax = pbp2A_end, ymin = 0, ymax = 0.5, Annotation_region = "pbp2A"), fill="blue") +
+    geom_rect(aes(xmin = pbpX_start, xmax = pbpX_end, ymin = 0, ymax = 0.5, Annotation_region = "pbpX"), fill="red") +
+    geom_rect(aes(xmin = pbp1B_start, xmax = pbp1B_end, ymin = 0, ymax = 0.5, Annotation_region = "pbp1B"), fill="orange") +
+    geom_rect(aes(xmin = pbp2B_start, xmax = pbp2B_end, ymin = 0, ymax = 0.5, Annotation_region = "pbp2B"), fill="purple")+
+    geom_point(aes(x=start, y = P)) +
+    theme_bw() +
+    xlab("") +  # Remove x axis label
+    scale_x_continuous(breaks = seq(0, max(the_data$start), by = 200000)) +  # Assign labels only to every 100 k values
+    #scale_y_continuous(expand=c(0,0))+
+    ylab("log10.p") 
+}
+
+manhattan_interactive = function(the_data, pbp1A_start, pbp1A_end, pbp2A_start, pbp2A_end, pbpX_start, pbpX_end,
+                                 pbp1B_start, pbp1B_end, pbp2B_start, pbp2B_end) {
+  g1 = ggplotly(manhattanplot(the_data, pbp1A_start, pbp1A_end, pbp2A_start, pbp2A_end, pbpX_start, pbpX_end,
+                              pbp1B_start, pbp1B_end, pbp2B_start, pbp2B_end), tooltip=c("text", "Annotation_region")) 
+  g1
+}
+
+make_manhattan = function(filename, annotation_name) {
+  # Read output from phandango mapper to reference genome.
+  #DEBUG
+  #filename = "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/ATCC700669_unitigs.plot"
+  #filename=unitig_matches_in_annotation[1]; annotation_name = annotated_file[1]
+  #annotation_name="/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/FM211187.gff3"
+  
+  manhattan_frame = manhattan_data_from_mapping(filename=filename)
+  
+  annotation = read.delim(annotation_name, header=F, comment.char="#")
+  colnames(annotation) = c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
+  
+  #If we only wish to extract a single gene.
+  #manhattan_frame$gene = extract_gene_from_annotation(starts = as.numeric(manhattan_frame$start), annotation = annotation)
+  
+  #Find all annotation info on the matching starting position of the unitig (what it overlaps with).
+  manhattan_frame$gene = extract_all_attributes_from_annotation(starts = as.numeric(manhattan_frame$start), annotation = annotation)
+  
+  #Add p-value and chromosome name.
+  manhattan_frame$P = manhattan_frame$`log10(p)`
+  manhattan_frame$CHR <- rep(1, nrow(manhattan_frame))
+  manhattan_frame$BP = as.numeric(manhattan_frame$start)
+  manhattan_frame$start = as.numeric(manhattan_frame$start)
+  
+  # Find position of pbp1a, pbp2b and pbp2x in the reference genome:
+  #which(str_detect(annotation$attributes, "pbp2A"))
+  
+  # Find start and end positions for pbp genes in the given reference genome. 
+  pbp1A_start = find_gene(annotation, "pbp1A")[1]
+  pbp1A_end = find_gene(annotation, "pbp1A")[2]
+  pbp2A_start = find_gene(annotation, "pbp2A")[1]
+  pbp2A_end = find_gene(annotation, "pbp2A")[2]
+  pbpX_start = find_gene(annotation, "pbpX")[1]
+  pbpX_end = find_gene(annotation, "pbpX")[2]
+  pbp1B_start = find_gene(annotation, "pbp1B")[1]
+  pbp1B_end = find_gene(annotation, "pbp1B")[2]
+  pbp2B_start = find_gene(annotation, "penA")[1]
+  pbp2B_end = find_gene(annotation, "penA")[2]
+  
+  
+  # Add segments to ggplot object
+  
+  manhattan_interactive(manhattan_frame,pbp1A_start, pbp1A_end, pbp2A_start, pbp2A_end, pbpX_start, pbpX_end,
+                                          pbp1B_start, pbp1B_end, pbp2B_start, pbp2B_end)
+}
+

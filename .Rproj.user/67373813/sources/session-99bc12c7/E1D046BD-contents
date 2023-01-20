@@ -1,0 +1,51 @@
+# Figured I couldn't use full paths for annotate_pysser_hit 
+# Instead I need to copy the reference genomes to the annotated folder, and run the script there.
+#Define references for pyseer. 
+# references = paste0("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Filtered/",
+#                     grep(".*fa",list.files("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Reference_genome"),value = T)
+# )
+# reference_annotations = paste0("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Filtered/",
+#                                grep(".*gff",list.files("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Reference_genome"),value = T)
+# )
+# reference_type = rep("ref", length(references))
+# references_txt1 = cbind(references,reference_annotations,reference_type)
+# 
+# #Find assemblies and their annotations
+# assemblies = paste0("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Filtered/",
+#                               grep(".*fasta",list.files("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Filtered/"),value = T)
+#                               )
+# assemblies_annotations = paste0("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Annotated_test/", 
+#                                 grep(".*gff.$",list.files("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Annotated/")
+#                                      ,value = T))
+
+references = paste0("",
+                    grep(".*fa",list.files("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs"),value = T)
+)
+reference_annotations = paste0("",
+                               grep(".*gff",list.files("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs"),value = T)
+)
+reference_type = rep("ref", length(references))
+references_txt1 = cbind(references,reference_annotations,reference_type)
+
+#Find assemblies and their annotations
+# assemblies = paste0("",
+#                     grep(".*fasta",list.files("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Filtered/"),value = T)
+# )
+#identifiers <- gsub(".fasta$", "", basename(as.character(assemblies)))
+
+assemblies = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Om_samlingen/input.txt",header = F)
+assemblies_annotations <- sub(".fasta$", ".gff3", as.character(assemblies$V1))
+)
+# assemblies_annotations = paste0("", 
+#                                 grep(".*gff.$",list.files("~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Annotated/")
+#                                      ,value = T))
+
+
+
+reference_type = rep("draft", length(assemblies))
+references_txt2 = cbind(assemblies,assemblies_annotations,reference_type)
+colnames(references_txt2) = colnames(references_txt1)
+#Combine the two lists
+references_txt = rbind(references_txt1,references_txt2)
+# write.table(references_txt,file = "~/Dropbox/Postdoc_pneumococcus/01_GWAS/Assemblies/Reference_genome/references.txt",quote=c(1,2), row.names = F,col.names = F)
+write.table(references_txt,file = "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/references.txt",quote=F, row.names = F,col.names = F)

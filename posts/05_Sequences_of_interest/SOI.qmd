@@ -1,0 +1,344 @@
+---
+title: "Sequences of interest"
+date: 2023-01-11
+editor: visual
+image: khpB.png
+knitr:
+  opts_chunk: 
+    comment: "#>" 
+    warning: FALSE
+    message: FALSE
+    collapse: TRUE
+    cache: FALSE
+execute:
+  echo: false
+  message: false
+  cache: FALSE
+format: 
+  html:
+    fig-width: 10
+    fig-height: 10
+    toc: true
+    toc-location: left
+    #fig-title: '**Figure**'
+    #title-delim: "**.**"
+---
+
+# Overview
+
+In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is KhpB, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS. It was found that when pbp2b is transferred to a strain, EloR acquires a 50 bp deletion.
+
+To understand the impact of this deletion on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies. A shorter gene length would indicate the presence of the 50 bp deletion or other modifications to the protein.
+
+## KhpB sequence length and MIC
+
+```{r }
+library(ggplot2)
+library(ggpubr)
+library(data.table)
+
+blast_eloR_full <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/blast_output_eloR_full_reverse.txt", header=TRUE, sep="\t", comment.char="#")
+
+# Add column names
+colnames(blast_eloR_full) <- c("query", "subject", "identity", "alignment_length", "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+
+
+# Extract contig number
+blast_eloR_full$contig_number<- gsub("^.*?_(\\d+)_.*", "\\1", blast_eloR_full$query)
+
+# Extract query_id
+blast_eloR_full$query_id <- gsub("^(.*?)_.*", "\\1", blast_eloR_full$query)
+
+
+# Read fasta file locations
+fasta_files = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Om_samlingen/input.txt")
+
+# read phenotype
+penicillin = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/06_Pyseer/phenotype.tsv", header=T)
+
+# Replace file ending ".fasta" with ".gff3" from fasta_files
+gff_files = gsub("\\.fasta$", ".gff3", fasta_files$V1)
+
+gff_files_identifiers = gsub(".gff3", "", gff_files); gff_files_identifiers = gsub(".*/", "", gff_files_identifiers)
+
+# Find the index of the query_id in the table of gff files
+inds = unlist(lapply(blast_eloR_full$query_id, function(x) which(x==gff_files_identifiers)))
+
+# Extract the file locations
+blast_eloR_full$file_location = gff_files[inds]
+
+#There is something weird among the names
+    
+
+# I am trying to write a script to find overlaps between the blast search and annotations in a gff3 file. 
+# Can you help me write the code. Base it on the pseudocode I wrote below and fill out the lines.
+
+# Loop over all lines in the blast table.
+# For each line:
+# Open the gff3 file.
+# Find the overlap between q_start, q_end
+# Extract the name of the gene 
+# Go to the contig position
+# Extract the found start and end positions from that contig
+# Calculate the length of the gene
+
+#library(tidyverse)
+
+# Load the blast table
+blast_table <- blast_eloR_full
+results = matrix(nrow = nrow(blast_table),ncol = 6)
+colnames(results)= c("Query", "Subject", "Identity", "Alignment length:", "Gene name:", "Gene length:")
+
+#Timeconsuming section
+#Loop over all lines in the blast table
+# 
+# for (i in 1:nrow(blast_table)) {
+#   cat(round(i/nrow(blast_table),2)*100,"%\r")
+#   # For each line
+#   blast_line <- blast_table[i,]
+# 
+#   # Open the gff3 file
+#   gff3_file = read.delim(blast_line$file_location, header=F, comment.char="#")
+# 
+#   colnames(gff3_file) = c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
+# 
+#   select_lines = which(gff3_file$seqid == paste0("contig_",blast_line$contig_number))
+# 
+#   # Filter for the correct contig:
+#   gff3_file = gff3_file[select_lines,]
+# 
+#   #Only use the last TRUE value
+#   line_select_gff3 <- max(which(blast_line$q_start >= gff3_file$start))
+# 
+#   # Find the overlap between q_start, q_end
+#   gff3_overlap = gff3_file[line_select_gff3,]
+# 
+#   #gff3_overlap <- gff3_file %>% filter(blast_line$q_start >= start  & blast_line$q_end <= end & type!="region")
+# 
+# 
+# 
+#   #DEBUG
+#   #cbind(gff3_file[,c("start","end")],blast_line$q_start >= gff3_file$start, blast_line$q_end <= gff3_file$end)
+#   #gff3_file$start >= blast_line$q_start
+#   #c2 = gff3_file$end <= blast_line$q_end
+# 
+# 
+#   # Filter for the right contig
+# 
+# 
+#   # Select correct match
+# 
+#   # Print warning if gff3_overlap still has multiple matches.
+#   if(nrow(gff3_overlap) > 1) {
+#     warning("Multiple matches found for query", blast_line$query)
+#   }
+# 
+#   # Extract the name of the gene
+#   gene_name <- gff3_overlap$attributes
+# 
+#   # Extract the found start and end positions from that contig
+#   gene_start <- gff3_overlap$start
+#   gene_end <- gff3_overlap$end
+# 
+#   # Calculate the length of the gene
+#   gene_length <- gene_end - gene_start
+# 
+#   # Print the results
+#   # cat("Query:", blast_line$query, "\n")
+#   # cat("Subject:", blast_line$subject, "\n")
+#   # cat("Identity:", blast_line$identity, "\n")
+#   # cat("Alignment length:", blast_line$alignment_length, "\n")
+#   # cat("Gene name:", gene_name, "\n")
+#   # cat("Gene length:", gene_length, "\n\n")
+#   results[i,] =c(blast_line$query,blast_line$subject, blast_line$identity, as.numeric(blast_line$alignment_length), gene_name, as.numeric(gene_length))
+# }
+
+results = as.data.frame(results)
+#save(results, file="/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/stored_data/gene_lengths.Rdata")
+load(file="/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/stored_data/gene_lengths.Rdata")
+
+# results is a dataframe
+# select rows of results where results$`Gene length:` < 900
+# define identifiers from query
+results$id = substring(results$Query, 1, as.integer(regexpr("_", results$Query)[1])-1)
+
+# Function to find the index of a sample in the penicillin table
+match_indexes = function(x) {
+  #  x is a vector of identifiers
+  ind = which(x==penicillin$samples)
+  # If there is no match, return NA
+  if(length(ind)==0) ind = NA
+  return(ind)
+  
+}
+
+
+results$MIC =  penicillin$penicillin_G[unlist(lapply(results$id, FUN=match_indexes))]
+
+#Omit missing values
+filtered_results = na.omit(results)
+
+#Remove gene lengths above 1100
+filtered_results = filtered_results[which(as.numeric(filtered_results$`Gene length:`)<1100),]
+filtered_results$`Gene length:` = as.numeric(filtered_results$`Gene length:`)
+filtered_results$`Alignment length:` = as.numeric(filtered_results$`Alignment length:`)
+
+
+```
+
+```{r}
+#| label: fig-blast_search
+#| fig-cap:  Blast search of assemblies against the full eloR sequence. 
+#|   The figure shows the relationship between the gene length and alignment length of the protein KhpB/eloR and the Minimum Inhibitory Concentration (MIC) of the isolates in our database. Panel A displays a scatter plot of the gene length and MIC, with the points plotted in red. Panel B displays a scatter plot of the alignment length and MIC, with the points plotted in blue.
+
+# Create a scatter plot of Gene length vs MIC
+p1 = ggplot(data = filtered_results, aes(x = `Gene length:`, y = MIC)) + 
+  geom_point(color = "red") +
+  #geom_smooth(method = "lm", se = FALSE) +
+  #geom_hex(bins = 20, stat = "hex", aes(fill = after_stat(density))) +
+  ggtitle("Gene length vs MIC") +
+  xlab("Gene length") +
+  ylab("MIC")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12))
+
+# Create a scatter plot of Alignment length vs MIC
+p2 = ggplot(data = filtered_results, aes(x = `Alignment length:`, y = MIC)) + 
+  geom_point(color = "blue") +
+  #geom_hex(bins = 20) +
+  #geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Alignment length vs MIC") +
+  xlab("Alignment length") +
+  ylab("MIC")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12))
+ggarrange(p1, p2, ncol = 1)
+```
+
+As seen in @fig-blast_search, there is no apparent correlation between the gene length of KhpB and the observed penicillin MIC. In fact, we see that most of the high MIC levels is observed around the normal gene length (approximately 986 base pairs).
+
+```{r}
+test = unlist(strsplit(results$`Gene name:`, split=";"))
+
+# results is a dataframe
+# possbily_broken_elo = filter(results,   as.numeric(results$`Gene length:`) < 950)
+# full_elo = filter(results,   as.numeric(results$`Gene length:`) >  950 & as.numeric(results$`Gene length:`) < 1100)
+# 
+# #
+# eloR_broken_indexes = unlist(lapply(possbily_broken_elo$id, FUN=function(x) which(x==penicillin$samples)))
+# eloR_full_indexes = unlist(lapply(full_elo$id, FUN=function(x) which(x==penicillin$samples)))
+# 
+# 
+# # select rows of results where results$`Gene length:` < 900
+# possbily_broken_elo
+# # define identifiers from query
+# results$id = substring(results$Query, 1, as.integer(regexpr("_", results$Query)[1])-1)
+# 
+# 
+# 
+# # find indexes of identifiers in penicillin# 
+# eloR_broken_MIC = penicillin$penicillin_G[eloR_broken_indexes]
+# eloR_full_MIC = penicillin$penicillin_G[eloR_full_indexes]
+# 
+# cat(" Median: broken eloR:", median(eloR_broken_MIC),"\n", "Median: full eloR: ",  median(eloR_full_MIC))
+```
+
+## KhpB amino acid length and MIC
+
+Next we searched directly for the protein "KhpB" in the annotated assemblies and inspected the length of the amino acid sequence. For example, if the amino acid sequence of any was significantly shorter than the typical distribution length, it may suggest a potential correlation with increased MIC.
+
+In 26 of the annotated assemblies, KhpB was split and the first domain of the KhpB protein was annotated as "jag".
+
+```{r include=F}
+# 1. List all faa files
+# 2.
+# grep -hr -A1 --no-group-separator "TerL" */*.faa > hellyeah.fasta
+fasta_data <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/jag_sequences.fasta", sep="\n", header=FALSE, stringsAsFactors=FALSE)
+# create a new variable that separates the header and sequence
+fasta_data$header <- sub("^>", "", fasta_data[,1])
+fasta_data$sequence <- fasta_data[,2]
+
+# remove the first column
+fasta_data$V1 <- NULL
+
+# rename the columns
+colnames(fasta_data) <- c("header", "sequence")
+fasta_data$header
+library(seqinr)
+
+```
+
+```{r include=F}
+#   ____________________________________________________________________________
+#   Extract protein sequences and plot the number of amino acids            ####
+#   khp and jag                                                             ####
+
+# source the fasta_protein_list_to_dataframe function
+source("/Users/magnusnygardosnes/Dropbox/Github/Bioinformatic_toolbox/R/fasta_protein_list_to_dataframe.R")
+
+# extract jag protein structure and sequence information
+jag = extract_structure_sequence("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/jag_sequences.fasta")
+
+# extract khps protein structure and sequence information
+khpB = extract_structure_sequence("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/KhP_sequences.fasta")
+
+# source the match_indexes_data1_data2 function
+source("/Users/magnusnygardosnes/Dropbox/Github/Bioinformatic_toolbox/R/match_indexes_data1_data2.R")
+
+# match jag identities in penicillin data set and add gene of interest column
+penicillin_jag = penicillin[match(jag$Identity, penicillin$samples),]
+penicillin_jag$gene_of_interest = rep("jag", nrow(penicillin_jag))
+
+# match khpB identities in penicillin data set and add gene of interest column
+penicillin_khpB = penicillin[match(khpB$Identity, penicillin$samples),]
+penicillin_khpB$gene_of_interest = rep("khpB", nrow(penicillin_khpB))
+
+# combine jag and penicillin data sets
+jag_full = cbind(jag, penicillin_jag)
+
+# combine khpB and penicillin data sets
+khpB_full = cbind(khpB, penicillin_khpB)
+
+#Combine both sets
+both_genes = rbind(khpB_full, jag_full)
+both_genes$n_amino_acids=as.numeric(both_genes$n_amino_acids)
+both_genes$penicillin_G=as.numeric(both_genes$penicillin_G)
+str(both_genes)
+
+
+```
+
+```{r}
+#| label: fig-boxplot
+#| fig-cap:  Distribution of Penicillin G resistance KhpB and jag annotations.
+#|   The x-axis represents the gene of interest and the y-axis represents the resistance level to Penicillin G.
+library(ggplot2)
+library(dplyr)
+ggplot(both_genes, aes(x = gene_of_interest, y = penicillin_G)) +
+  geom_boxplot()+theme_light()
+
+```
+
+@fig-boxplot shows that most of the high penicillin resistance levels are in the KhpB annotations. Next we look at the gene length:
+
+```{r include=T}
+#| label: fig-gene_length
+#| fig-cap:  The relationship between the length of the gene in terms of amino acids and the resistance levels to Penicillin G.
+#|   The x-axis represents the length of the gene in terms of amino acids, the y-axis represents the resistance level to Penicillin G. The color of the points indicates if the annotation was KhpB was split to jag or just annotated khpB. 
+ggplot(both_genes, aes(x = n_amino_acids, y = penicillin_G, color = gene_of_interest)) +
+  geom_point() +
+  ggtitle("Gene length versus penicillin levels") +
+  xlab("Gene length (amino acids)") +
+  ylab("Penicillin levels")+theme_light()
+
+```
+
+@fig-gene_length shows that most of the high penicillin resistance levels are observed for normal length variants of the KhpB protein. Most of the high MIC isolates have 328 amino acids in KhpB.
+
+## Summary
+
+In this analysis, we studied specific genes of interest identified by our colleagues at NMBU, focusing on the protein KhpB and its correlation with pbp2b, a protein known to play a role in increasing Minimum Inhibitory Concentration (MIC). We set up a BLAST database for eloR, extracted matches and the gene length of the match in the respective assemblies, and searched for the protein "KhpB" in annotated assemblies to inspect the length of the amino acid sequence. Our results showed that there is no clear relationship between the gene length of KhpB and the observed penicillin MIC, and most of the high MIC levels were observed around the normal gene length. Additionally, we found that most of the high penicillin resistance levels were in the KhpB annotations, with most high MIC isolates having 328 amino acids in KhpB.

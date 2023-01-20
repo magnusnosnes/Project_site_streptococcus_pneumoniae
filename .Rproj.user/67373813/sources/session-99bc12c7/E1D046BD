@@ -1,0 +1,26 @@
+{
+    "id": "E1D046BD",
+    "path": "~/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/define_references.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "1086970370",
+    "contents": "",
+    "dirty": false,
+    "created": 1672737265619.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "17,123",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1672748779,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1672748779,
+    "read_only": false,
+    "read_only_alternatives": []
+}

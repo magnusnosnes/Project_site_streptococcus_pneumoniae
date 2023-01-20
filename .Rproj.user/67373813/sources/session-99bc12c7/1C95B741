@@ -1,0 +1,32 @@
+{
+    "id": "1C95B741",
+    "path": "~/Dropbox/Github/Quarto_website/posts/04_GWAS/GWAS.qmd",
+    "project_path": "posts/04_GWAS/GWAS.qmd",
+    "type": "quarto_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1674041258995.0,
+    "source_on_save": false,
+    "relative_order": 10,
+    "properties": {
+        "rmdVisualMode": "false",
+        "rmdVisualWrapConfigured": "true",
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "docOutlineVisible": "1",
+        "rmdVisualCollapsedChunks": "",
+        "cursorPosition": "126,0",
+        "scrollLine": "116",
+        "rmdVisualModeLocation": "2:1129.5999755859375"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1674135901,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1674135901017,
+    "read_only": false,
+    "read_only_alternatives": []
+}

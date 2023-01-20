@@ -1,0 +1,26 @@
+{
+    "id": "44BE7511",
+    "path": "~/Desktop/Postdoc/Pneumo/08_Summarize_results/making_manhattan_frame_from_pyseer.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1673343902835.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "25,40",
+        "scrollLine": "12"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1673345393,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1673873744373,
+    "read_only": false,
+    "read_only_alternatives": []
+}

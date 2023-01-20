@@ -1,0 +1,293 @@
+---
+title: "Conditional GWAS"
+bibliography: disentangling.bib
+date: 2023-01-03
+editor: visual
+image: cover.png
+knitr:
+  opts_chunk: 
+    comment: "#>" 
+    warning: FALSE
+    message: FALSE
+    collapse: TRUE
+    cache: FALSE
+execute:
+  echo: false
+  message: false
+  cache: FALSE
+format: 
+  html:
+    fig-width: 20
+    fig-height: 25
+    page-layout: full
+    toc: true
+    toc-location: left
+    #fig-title: '**Figure**'
+    #title-delim: "**.**"
+---
+
+# Overview
+
+## Models
+
+Here we present the results of a genome-wide association study (GWAS) conducted using [pyseer](https://pyseer.readthedocs.io/en/master/#) [@lees2018], a tool for identifying genetic associations with complex traits. The GWAS was performed using the linear mixed effects model such that the minimum inhibitory concentration (MIC) of Penicillin G: $$\mathbf{y} \sim \mathbf{W} \mathbf{a} + \mathbf{X} \mathbf{b} + \mathbf{K} \mathbf{u} +\epsilon$$
+
+with
+
+$$
+\begin{align*}
+\mathbf{u} \sim \mathcal{N} \left( 0, \sigma^2_g \mathbf{G} \right), \quad &\mathbf{\epsilon} \sim \mathcal{N} \left( 0, \sigma^2_g \mathbf{I} \right)
+\end{align*}
+$$
+
+Where $\mathbf{G}$ is the similarity matrix that was obtained from the phylogenetic relationship of the samples, and $\mathbf{I}$ is the identity matrix.
+
+| **Symbol** | **Meaning**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|---------------|---------------------------------------------------------|
+| 𝑦          | A vector containing the MIC data for each sample.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 𝑊          | A design matrix containing the conditional covariates: We used categorical variables for the variants of pencillin binding proteins *pbp1a*, *pbp2b* and *pbp2x,* coded according to the allele scheme proposed in [@li2016], and benchmarked in [@li2017]. The allele codes were obtained by running the [Pathogenwatch pipeline](https://cgps.gitbook.io/pathogenwatch/). We also included the study the data was obtained as a categorical variable, to capture differences in MIC measurement protocols. |
+| 𝑎          | Fixed effects for the covariates.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 𝑋          | A design matrix containing the presence or absence of the unitigs.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 𝑏          | Fixed effects of the unitigs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 𝐾          | The similarity matrix between all pairs of samples. We used a neighbor-joining phylogeny estimated using [PopPUNK](https://poppunk.readthedocs.io/en/latest/) [@lees2019].                                                                                                                                                                                                                                                                                                                                   |
+| 𝑢          | Random effects for each row of the kinship matrix.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ε          | Normally distributed error terms.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+
+: Information about the GWAS model {#tbl-model_information}
+
+Thus we assume that the MIC can be predicted by the covariates with the correlation structure implied by the phylogenetic relationship of the samples. If we take the expectation of the equation we obtain $$E(\mathbf{y}) \sim \mathbf{W} \mathbf{a} + \mathbf{X} \mathbf{b} + \mathbf{K} \mathbf{u} +\epsilon$$ $$ = E(\mathbf{W} \mathbf{a} + \mathbf{X} \mathbf{b} + \mathbf{K} \mathbf{u} +\epsilon)$$ $$ = \mathbf{W} \mathbf{a} + \mathbf{X} \mathbf{b}$$ and variance $$V(\mathbf{y}) = V(\mathbf{W} \mathbf{a} + \mathbf{X} \mathbf{b} + \mathbf{K} \mathbf{u} +\epsilon)$$ $$
+\begin{aligned}
+V(\mathbf{y}) = V(\mathbf{W} \mathbf{a} + \mathbf{X} \mathbf{b} + \mathbf{K} \mathbf{u} +\epsilon) \\
+= V(\mathbf{K} \mathbf{u} + \epsilon) \\
+= V(\mathbf{K} \mathbf{u}) + V(\epsilon) \\
+= \sigma^2_g \mathbf{G} + \sigma^2_g \mathbf{I}
+\end{aligned}
+$$
+
+## Filtering of unitigs and defining significance threshold
+
+We filtered the unitigs based on a minimum allele frequency (MAF) between \[0.01, 0.99\] meaning that the unitigs have to be present in more than 1% and less than 99% of the isolates. We used the number of patterns in the unitigs to define a significance threshold of the p-values of the unitigs. We detected 974212 unique patterns translating to a significance threshold of $p = 5.13\cdot 10^{-08}$. All downstream results and visualizations were reported for unitigs with a smaller p-value than the threshold. Many of these hits were then annotated using the nomenclature of [Bakta](https://github.com/oschwengers/bakta) [@schwengers2021]. The annotations can be looked up on NCBI for further information.
+
+# Results
+
+```{r}
+#library(manhattanly)
+# Mapped 
+#reference_mapping = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/ATCC700669_unitigs.plot")
+```
+
+## Significant hits ordered by average effect size
+
+```{r }
+# <!-- Write a quick introduction to my blogpost on a GWAS analysis of Streptococcus Pneumoniae using Pyseer. 
+# Include that it the conditinal gwas was doneconditionally on the covariates: country of origin, pbp allele coded after Li et. al.'s study from 2016 / 2017, and the the response variable was MIC treated as a continous variable .
+# Mention that the reader can explore the siginificant hits below and that many of the hits are annotated using the nomenclature of Bakta (which can be searched for on NCBI). --> 
+
+require(ggplot2)
+require(plotly)
+library(ggrepel)
+
+
+gene_hits = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/gene_hits.txt", stringsAsFactors=FALSE, header=TRUE)
+
+AS = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/annotated_unitigs.txt", sep="\t")
+gene_hits$names_for_display = gene_hits$gene
+
+#Remove name if their annotation starts with cds- to make an alnternate name list
+gene_hits$names_for_display[grep("cds-", gene_hits$gene)] = ""
+# Ensure that the variable types are 
+gene_hits$avg_maf=as.numeric(gene_hits$avg_maf)
+gene_hits$avg_beta = as.numeric(gene_hits$avg_beta)
+
+```
+
+::: {style="width:100%"}
+```{r fig.height=10, fig.width=20}
+#| label: fig-effect_size_annotations
+#| fig-cap: Plot of unitigs mapped to annotated regions of references and assemblies.
+#|   This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value.
+g1 = ggplot(gene_hits, aes(x=avg_beta, y=maxp, colour=avg_maf, size=hits, label=names_for_display)) +
+  geom_point(alpha=0.5) +
+  geom_text_repel(aes(size=60), show.legend = FALSE, colour='black') +
+  scale_size("Number of unitigs", range=c(1,10)) +
+  scale_colour_gradient('Average MAF') +
+  theme_bw(base_size=14) +
+  ggtitle("Penicillin resistance") +
+  xlab("Average effect size") +
+  ylab("Maximum -log10(p-value)")
+g1
+
+```
+
+## Significant hits ordered by minor allele frequency (MAF)
+
+```{r fig.height=10, fig.width=20}
+#| label: fig-maf_annotations
+#| fig-cap: Plot of unitigs mapped to annotated regions of references and assemblies.
+#|   This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value.
+
+g2 = ggplot(gene_hits, aes(x=avg_maf, y=maxp, colour=avg_beta, size=hits, label=names_for_display)) +
+  geom_point(alpha=0.5) +
+  geom_text_repel(aes(size=60), show.legend = FALSE, colour='black') +
+  scale_size("Number of unitigs", range=c(1,10)) +
+  scale_colour_gradient('Average effect size') +
+  theme_bw(base_size=14) +
+  ggtitle("Penicillin resistance") +
+  xlab("Average MAF") +
+  ylab("Maximum -log10(p-value)")
+g2
+
+```
+:::
+
+## Interactive plot of unitigs mapped to genes
+
+In the figures below the unitigs are mapped to reference genomes and. As references we used multiple genomes, and additionally we annotated our
+
+::: {.panel-tabset style="width:100%"}
+## Significant hits ordered by effect size
+
+```{r}
+#| label: fig-interactive_effect_size
+#| fig-cap: Interactive plot of unitigs mapped to annotated regions of references and assemblies.
+#|   This scatter plot shows the relationship between the average effect size and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average minor allele frequency (MAF). Points are labeled with gene name. The plot highlights genes that have high effect size and large -log10(p-value) as well as high unitig count and high MAF value.
+g1 = ggplot(gene_hits, aes(x=avg_beta, y=maxp, colour=avg_maf, size=hits, label=names_for_display,text = paste0("gene name from annotation: ", gene))) +
+  geom_point(alpha=0.5) +
+  geom_text(aes(size=15), nudge_y=1, colour='black') +
+  scale_size("Number of unitigs", range=c(1,10)) +
+  scale_colour_gradient('Average MAF') +
+  theme_bw(base_size=14) +
+  ggtitle("Penicillin resistance") +
+  xlab("Average effect size") +
+  ylab("Maximum -log10(p-value)")
+ggplotly(g1)
+```
+
+## Significant hits ordered by MAF
+
+```{r}
+#| label: fig-interactive_MAF
+#| fig-cap: Interactive plot of unitigs mapped to annotated regions of references and assemblies.
+#|   This scatter plot shows the relationship between the average minor allele frequency (MAF) and the maximum -log10(p-value) of genes associated with penicillin resistance. The size of the points represents the number of unitigs, and the color represents the average effect size of the genes. Points are labeled with gene name. The plot highlights genes that have high MAF value and large -log10(p-value) as well as high unitig count and large average effect size.
+g2 = ggplot(gene_hits, aes(x=avg_maf, y=maxp, colour=avg_beta, size=hits, label=names_for_display, text = paste0("gene name from annotation: ", gene))) +
+  geom_point(alpha=0.5) +
+  geom_text(aes(size=15), nudge_y =1, colour='black') +
+  scale_size("Number of unitigs", range=c(1,10)) +
+  scale_colour_gradient('Average effect size') +
+  theme_bw(base_size=14) +
+  ggtitle("Penicillin resistance") +
+  xlab("Average MAF") +
+  ylab("Maximum -log10(p-value)")
+ggplotly(g2)
+```
+:::
+
+## Summary of annotated regions matching the unitigs (Table)
+
+```{r}
+#| label: fig-genehits
+#| fig-cap: Gene hits
+#|   Annotated regions of mapped unitigs. The table summarizes the locations of unitigs in the genome, including the gene annotated region (gene), the number of unitigs in that region (HITS), the highest observed p-value (MAXP), the average minimum allele frequency (AVG_MAF), and the average effect size (AVG_BETA) of unitigs within the region. The table also includes a column (NAMES_FOR_DISPLAY) to indicate regions that have common gene names, which match the names in the interactive figures above.
+library(DT)
+library(kableExtra)
+sorted_gene_hits = gene_hits[order(-gene_hits$avg_beta),]
+rownames(sorted_gene_hits)=1:nrow(sorted_gene_hits)
+sorted_gene_hits= sorted_gene_hits[,-4]
+datatable(sorted_gene_hits, options = list(scrollX = TRUE), caption= "test")
+```
+
+## Unitig sequences, significance, effect size and heritability (Table)
+
+```{r }
+#| label: fig-unitig-sequences
+#| fig-cap: Unitig sequences.
+#|   The table displays various characteristics of the significant unitigs including allele frequency (AF), p-value (filter-pvalue), likelihood (lrt-pvalue), effect size (beta), estimated standard error of the effect size (beta-std-err), estimated heritability of the unitig sequence (variant_h2), and the annotated region in which the unitig is found (annotation) as well as the nearest upstream and downstream annotated regions (gene-upstream gene-downstream gene).
+colnames(AS)=c("Unitigs","af","filter-pvalue","lrt-pvalue","beta","beta-std-err","variant_h2","annotation")
+datatable(AS, options = list(scrollX = TRUE))
+```
+
+```{r}
+# Set up filenames and annotations for all the reference genomes.
+unitig_matches_in_annotation = c("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/ATCC700669_unitigs.plot",
+                                 "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/ASM207683v1_unitigs.plot",
+                                 "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/CP035897_unitigs.plot",
+                                 "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/CP003357_unitigs.plot",
+                                 "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/CP089948_unitigs.plot",
+                                 "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/CP089949_unitigs.plot")
+
+annotated_file = c("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/FM211187.gff3",
+                   "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/ASM207683v1.gff3",
+                   "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/CP035897.gff3",
+                   "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/CP003357.gff3",
+                   "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/CP089948.gff3",
+                   "/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/07_Reference_genomes_to_map_unitigs/CP089949.gff3")
+
+source("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/08_Summarize_results/making_manhattan_frame_from_pyseer.R")
+```
+
+## Unitigs mapped to reference genomes
+
+In total we extracted 2527 significant unitigs. We mapped these unitigs to different reference genomes, summarized in the table below. *Streptococcus pneumoniae* has a large pan-genome, and none of the references contain all of the unitigs. Note that a high fraction of the unitigs were found in ST556, which represents a sequence from a multidrug-resistant isolate from an otitis media patient [@li2012].
+
+| Reference strain | Description                                                                                                                                                                                                                                                         |
+|----------------|--------------------------------------------------------|
+| ATCC70066        | Multidrug-Resistant Pandemic Clone *Streptococcus pneumoniae*. 885 out of 2527 unitigs were mapped to this genome. <https://doi.org/10.1128/JB.01343-08>                                                                                                            |
+| Hu17             | high-level beta-lactam resistance and penicillin sensitive phenotype. 719 out of 2527 unitigs were mapped to this genome. <https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_002076835.1/>                                                                           |
+| EF3030           | A serotype 19F isolate that colonizes the nasopharynx of mice while being mostly noninvasive. 1359 out of 2527 unitigs were mapped to this genome. <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6509521/>                                                          |
+| ST556            | A Multidrug-Resistant Isolate from an Otitis Media Patient. 2147 out of 2527 unitigs were mapped to this genome. <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370858/>                                                                                            |
+| TIGR4            | From the paper: The acquisition of clinically relevant amoxicillin resistance in *Streptococcus pneumoniae* requires ordered horizontal gene transfer of four loci. 774 out of 2527 unitigs were mapped to this genome. <https://pubmed.ncbi.nlm.nih.gov/35877768/> |
+| SN75752          | From the paper: The acquisition of clinically relevant amoxicillin resistance in *Streptococcus pneumoniae* requires ordered horizontal gene transfer of four loci. 748 out of 2527 unitigs were mapped to this genome. <https://pubmed.ncbi.nlm.nih.gov/35877768/> |
+
+: Information about the reference strains {#tbl-reference_strains}
+
+::: {#fig-unitigs_to_reference}
+::: {.panel-tabset style="width:100%"}
+## ATCC700669
+
+```{r}
+make_manhattan(filename = unitig_matches_in_annotation[1], annotation_name = annotated_file[1])
+```
+
+## Hu17
+
+```{r}
+make_manhattan(filename = unitig_matches_in_annotation[2], annotation_name = annotated_file[2])
+```
+
+## EF3030
+
+```{r}
+make_manhattan(filename = unitig_matches_in_annotation[3], annotation_name = annotated_file[3])
+```
+
+## ST556
+
+```{r}
+make_manhattan(filename = unitig_matches_in_annotation[4], annotation_name = annotated_file[4])
+```
+
+## TIGR4
+
+```{r}
+make_manhattan(filename = unitig_matches_in_annotation[5], annotation_name = annotated_file[5])
+```
+
+## SN75752
+
+```{r}
+make_manhattan(filename = unitig_matches_in_annotation[6], annotation_name = annotated_file[6])
+```
+:::
+
+Unitigs mapped to various reference genomes. The reference strains used for the mapping are described in the table above. The data displayed when hovering over the points in the figure represents the annotation attributes extracted from the genes that overlap with the starting position of the unitig (basepair position). It's noteworthy that the "product" and "gene" attributes can provide valuable insights into the function of the genomic regions that the unitigs overlap with.
+:::
+
+# References
+
+::: {#refs}
+:::
+
+```{r}
+# : Information about the reference strains {#tbl-reference_strains}
+# : Model information {#tbl_model}
+```

@@ -1,0 +1,45 @@
+/* css styles */
+
+.tabbable {
+    font-size: 12pt;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+
+.tab-pane {
+  font-size: 12pt;
+  margin: 20px 0;
+}
+
+.nav-pills {
+    --bs-nav-pills-border-radius: .600rem;
+    --bs-nav-pills-link-active-color: #fff;
+    --bs-nav-pills-link-active-bg: #5d2f86;
+    font-size: 15pt;
+}
+
+.nav {
+    --bs-nav-link-padding-x: 1rem;
+    --bs-nav-link-padding-y: .5rem;
+    --bs-nav-link-font-weight: ;
+    --bs-nav-link-color: var(--bs-link-color);
+    --bs-nav-link-hover-color: var(--bs-link-hover-color);
+    --bs-nav-link-disabled-color: #6c757d; 
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+ 
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  text-align: center;
+}

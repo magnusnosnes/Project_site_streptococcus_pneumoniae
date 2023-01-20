@@ -1,0 +1,17 @@
+---
+title: "Disentangling penicillin resistance and compensatory adaption in pneumococci"
+subtitle: "by combining genomics and molecular microbiology"
+author-title: "The DNA detectives"
+format:
+  html:
+    page-layout: full
+  
+listing:
+  type: default
+  sort: "date desc"
+  contents: posts
+  max-description-length: 150
+---
+
+::: {style="height:150px"}
+:::

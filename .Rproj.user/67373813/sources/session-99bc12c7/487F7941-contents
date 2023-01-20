@@ -1,0 +1,133 @@
+#Load seqinr library
+library(seqinr)
+
+# Blasting against the reduced eloR sequence. 
+blast_eloR_reduced <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/blast_output_eloR_reduced_reverse.txt", header=TRUE, sep="\t", comment.char="#")
+
+#test 
+
+# Blasting against the full eloR sequence. 
+blast_eloR_full <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/blast_output_eloR_full_reverse.txt", header=TRUE, sep="\t", comment.char="#")
+
+# Blasting against the deletion directly.
+blast_eloR_deletion <- read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/blast_output_eloR_deletion_reverse.txt", header=TRUE, sep="\t", comment.char="#")
+
+# rename the columns
+colnames(blast_eloR_reduced) <- c("query", "subject", "identity", "alignment_length", "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+colnames(blast_eloR_full) <- c("query", "subject", "identity", "alignment_length", "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+colnames(blast_eloR_deletion) <- c("query", "subject", "identity", "alignment_length", "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+
+# Read a fasta file in R.
+eloR_full <- read.fasta("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/eloR_full.fasta")
+eloR_reduced <- read.fasta("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Sequences_of_interest_NMBU/eloR_reduced.fasta")
+
+# Print the length of the sequences
+length(eloR_full$EloR_R6); length(eloR_reduced$EloR_RSG77); length(eloR_full$EloR_R6)-length(eloR_reduced$EloR_RSG77)
+
+library(ggplot2)
+
+# How large of an identity score do we need to have to be considered a hit?
+threshold = length(eloR_reduced$EloR_RSG77)/ length(eloR_full$EloR_R6)
+threshold = 95.0
+
+# Select elements with an identity score of 100% and an evalue of 0
+# and alginment length longer than 930.
+#do the same for the full sequence
+blast_eloR_full <- blast_eloR_full[blast_eloR_full$alignment_length > 900,]
+blast_eloR_reduced <- blast_eloR_reduced[blast_eloR_reduced$alignment_length > 900,]
+
+blast_eloR_reduced <- blast_eloR_reduced[blast_eloR_reduced$identity > threshold,]
+blast_eloR_full <- blast_eloR_full[blast_eloR_full$identity > threshold,]
+min(blast_eloR_reduced$identity)
+min(blast_eloR_full$identity)
+
+# extract the sequence identifiers from the query column and set that to a new column called "query_id"
+blast_eloR_reduced$query_id <- gsub("_.*", "", blast_eloR_reduced$query)
+blast_eloR_full$query_id <- gsub("_.*", "", blast_eloR_full$query)
+blast_eloR_deletion$query_id <- gsub("_.*", "", blast_eloR_deletion$query)
+
+# Check the number of unique elements in the query_id column of both dataframes
+reduced_identifiers = unique(blast_eloR_reduced$query_id)
+full_identifiers = unique(blast_eloR_full$query_id)
+deletion_identifiers = unique(blast_eloR_deletion$query_id)
+
+#Read MIC data. 
+
+# Read in the phenotype file
+penicillin = read.table("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/06_Pyseer/phenotype.tsv", header=T)
+
+# Extract the index of the full set
+eloR_full_indexes = unlist(lapply(reduced_identifiers, FUN=function(x) which(x==penicillin$samples)))
+
+# Extract the index of the reduced set
+eloR_reduced_indexes = unlist(lapply(full_identifiers, FUN=function(x) which(x==penicillin$samples)))
+
+# Extract the index of the deletion set
+eloR_deletion_indexes = unlist(lapply(deletion_identifiers, FUN=function(x) which(x==penicillin$samples)))
+
+# Setup the indexes for the samples with the deletion
+inds = 1:nrow(penicillin); inds = inds[-eloR_deletion_indexes]
+
+
+# Get indexes of the samples in the phenotype file
+eloR_full_MIC = penicillin$penicillin_G[eloR_full_indexes]
+eloR_reduced_MIC = penicillin$penicillin_G[eloR_reduced_indexes]
+eloR_with50BP_MIC = penicillin$penicillin_G[eloR_deletion_indexes]
+eloR_without50BP_MIC = penicillin$penicillin_G[inds]
+
+
+# Plot the MICs for the full and reduced eloR
+MIC = c(eloR_full_MIC,eloR_reduced_MIC)
+MIC_deletion_withuout_deletion = c(eloR_with50BP_MIC, eloR_without50BP_MIC)
+
+#Setup gene variants
+gene_variants_withwithout = c(rep("eloR_with50BP_MIC", length(eloR_with50BP_MIC)), rep("eloR_without50BP_MIC", length(eloR_without50BP_MIC)))
+gene_variants = c(rep("eloR_full", length(eloR_full_MIC)), rep("eloR_reduced", length(eloR_reduced_MIC)))
+
+dat1 = cbind(as.numeric(MIC),gene_variants)
+colnames(dat1)=c("MIC", "gene_variants")
+dat1 = as.data.frame(dat1)
+
+dat2 = cbind(as.numeric(MIC_deletion_withuout_deletion),gene_variants_withwithout)
+colnames(dat2)=c("MIC", "gene_variants")
+dat2 = as.data.frame(dat2)
+
+library(ggplot2
+
+ggplot(dat1, aes(x = gene_variants, y = as.numeric(MIC))) +
+  geom_boxplot(fill = "#E6E6E6", color = "black") +
+  geom_jitter(size = 2, alpha = 0.5, color = "#FF5722") +
+  ggtitle("MIC by gene variants") +
+  xlab("Gene variants") +
+  ylab("MIC")+
+  theme_light()+
+  coord_flip()
+
+# Plot dat2 the same way
+g1 = ggplot(dat2, aes(x = gene_variants, y = as.numeric(MIC))) +
+  geom_boxplot(fill = "#E6E6E6", color = "black") +
+  geom_jitter(size = 2, alpha = 0.5, color = "#FF5722") +
+  ggtitle("MIC by gene variants") +
+  xlab("Gene variants") +
+  ylab("MIC")+
+  theme_light()
+g1
+
+colors <- c("#000000", "#1A1A1A", "#333333", "#4D4D4D", "#666666", "#808080", "#999999", "#B3B3B3", "#CCCCCC", "#E6E6E6", "#FFFFFF", 
+            "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", 
+            "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#795548", "#9E9E9E", "#607D8B", "#E91E63", "#9C27B0", "#3F51B5", 
+            "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A",
+            "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#9E9E9E", "#607D8B", "#795548", "#9E9E9E", "#607D8B", "#E91E63",
+            "#9C27B0", "#3F51B5", "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688",
+            "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#9E9E9E", "#607D8B", "#795548", "#9E9E9E",
+            "#607D8B")
+
+
+annotation_first_eloR_reduced = read.delim("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/pneumo_project_USA_ERR/Spades_assembly/Filtered/ERR876551.gff3", sep="\t", header=F, comment.char="#")
+colnames(annotation_first_eloR_reduced) = c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
+eloR_reduced
+
+# In other words: khpA or KhpA is eloR.
+
+# Next steps: 
+

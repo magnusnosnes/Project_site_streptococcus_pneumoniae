@@ -1,0 +1,571 @@
+---
+title: "An overview of the data"
+editor: visual
+date: 2022-11-04
+image: Samples.png
+knitr:
+  opts_chunk: 
+    comment: "#>" 
+    warning: FALSE
+    message: FALSE
+    collapse: TRUE
+    cache: FALSE
+execute:
+  echo: false
+  message: false
+---
+
+
+```{r remedy001, include=F}
+library(readxl)
+library(ggplot2)
+library(lubridate)
+setwd("/Users/magnusnygardosnes/Dropbox/Postdoc_pneumococcus/00_Collection_overview")
+SA = readxl::read_xlsx("GPSC_South_Africa.xlsx")
+Maela = readxl::read_xls("maela_PLOS_Genetics_PEN.xls")
+Norway_routine = read_xlsx("/Users/magnusnygardosnes/Dropbox/Postdoc_pneumococcus/00_Collection_overview/Nor2018-2022_metadata.xlsx")
+Norway_historic = readxl::read_xlsx("Pneumoprosjekt_NMBU_FHI_nummerert_eksportert.xlsx")
+USA = readxl::read_xlsx("USA_12864_2017_4017_MOESM1_ESM.xlsx")
+
+#The data originated from the following studies:
+#studies = list(Maela="10.1371/journal.pgen.1004547",USA="")
+
+
+#South Africa is done.
+SA_for_study = SA
+SA_for_study = SA_for_study[,c("ERR","Year","Country","Penicillin")]
+
+
+#1. Currently missing data on year of isolation.
+#2. Need to reorder columns
+#3. Need to handle MIC values above and below the thresholds.
+
+Maela_for_study = Maela
+Maela_for_study = Maela_for_study[,c("ENA_accession_no", "penicillin_MIC(µg/mL)")]
+Maela_for_study$Country = rep("Maela", nrow(Maela_for_study))
+#Extra info Maela
+# Use the gsub function to replace "<0.06" with "0.06" in the count column
+# Check how to they handled <0.06 in the original study. 
+Maela_for_study$`penicillin_MIC(µg/mL)`<- gsub("<0.06", "0.06", Maela_for_study$`penicillin_MIC(µg/mL)`)
+
+maela_extra = read_xlsx("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/pneumo_project_Maela/41588_2014_BFng2895_MOESM61_ESM.xlsx")
+match_indexes = unlist(lapply(Maela_for_study$ENA_accession_no,
+                              FUN = function(x) which(x == maela_extra$ENA_accession_no)))
+Maela_for_study$Year = x=decimal_date(as.Date(maela_extra$date_of_collection[match_indexes]))
+Maela_for_study = Maela_for_study[,c(1,4,3,2)]
+Maela_for_study$`penicillin_MIC(µg/mL)`
+
+#The USA
+#Was used to train a pbp model in
+# https://doi.org/10.1186/s12864-017-4017-7
+#But originally comes from these two studies
+# https://doi.org/10.1128/mBio.00756-16
+# https://doi.org/10.1016/j.cmi.2015.08.027
+#1. Currently missing data on year of isolation.
+#2. Need to reorder columns
+#3. Need to handle MIC values above and below the thresholds.
+#Notes: They used multiple platforms: HiSeq and MiSeq.
+#THe metadata of USA is also way too long, must remove the fasta files not used. 
+USA_for_study = USA
+USA_for_study = USA_for_study[,c("Biosample Accession","PEN")]
+USA_for_study$Country = rep("USA", nrow(USA_for_study))
+#Need additional metadata for dates
+usa_extra1 = read_xlsx("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/pneumo_project_USA_ERR/Extra_1_USA.xlsx",skip=1,col_names=c("CDC_lab_id","Accession","Year"))
+usa_extra1$Accession
+indexes_1 = unlist(lapply(USA_for_study$`Biosample Accession`, FUN=
+                            function(x) ifelse(x %in% usa_extra1$Accession, which(x==usa_extra1$Accession),NA)))
+USA_for_study$Year = usa_extra1$Year[indexes_1]
+USA_for_study = USA_for_study[,c("Biosample Accession","Year", "Country", "PEN")]
+#Missing years for the remaining accessions
+#Paste this in terminal
+#esearch -db bioproject -query "ERR505998"
+#USA$`Biosample Accession` #Extract collection date for each biosample accesssion number
+#esearch -db pubmed -query "ERR586469 [PACC]"
+#Pubmed stores collection date as:
+#<TAG>collection date</TAG>
+#<VALUE>2009</VALUE>
+
+#Massachusetts
+#Also check what they did in the study. 
+# < 0.01 -> 0.008 <.016 -> 0.008 <=0.03 -> 0.03 <0.016 -> 0.008  <0.03 -> 0.015
+# >4 and >4.00 set to 4.
+MIC_translate <- c(
+  "< 0.01" = 0.008,
+  "<.016" = 0.008,
+  "<=0.03" = 0.03,
+  "<0.016" = 0.008,
+  "<0.03" = 0.015,
+  ">4" = 4,
+  ">4.00" = 4
+)
+
+Massachusetts = read_xlsx("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/pneumo_project_Massachusetts/Massachusetts_nature_genetics.xlsx")
+Massachusetts_for_study = Massachusetts[,c("Accession","Year of Isolation","Benzylpenicillin MIC (μg/mL)")]
+Massachusetts_for_study$Country = rep("Massachusetts", nrow(Massachusetts))
+Massachusetts_for_study = Massachusetts_for_study[,c(1,2,4,3)]
+# Replace the values in the Benzylpenicillin MIC (μg/mL) column
+# with the corresponding values from the MIC_translate vector
+# using the indexes_to_replace vector to identify which values to replace
+indexes_to_replace = which(Massachusetts_for_study$`Benzylpenicillin MIC (μg/mL)` %in% names(MIC_translate))
+Massachusetts_for_study$`Benzylpenicillin MIC (μg/mL)`[indexes_to_replace] =
+  MIC_translate[Massachusetts_for_study$`Benzylpenicillin MIC (μg/mL)`[indexes_to_replace]]
+# table(Massachusetts_for_study$`Benzylpenicillin MIC (μg/mL)`)
+
+#Norway historic.
+#1. Need a translation table for all the PG_MIC values
+# 16(24) is probably 16
+# 2 (3) is probably 2
+# Skipping historic for contionus analysis - might need later (R,I,S). 
+MIC_translate <- c(
+"16 (24)" = 16,
+"2 (3)" = 2,
+"<0,016" = 0.016,
+"0,008_mg/L_" = 0.008,
+"0,016" = 0.016,
+"0,016_mg/L_" = 0.016,
+"0,032" = 0.032,
+"0,032_mg/L_" = 0.032,
+"0,064" = 0.064,
+"0,064_mg/L_" = 0.064,
+"0,125" = 0.125,
+"0,125_mg/L_" = 0.125,
+"0,19_mg/L_" = 0.19,
+"0,25" = 0.25,
+"0,25_mg/L_" = 0.25,
+"0,5_mg/L_" = 0.5,
+"1_mg/L_" = 1,
+"16(24)" = 16,
+"2_mg/L_" = 2,
+"2(3)" = 2,
+"4_mg/L_" = 4,
+"Intermediær_MIC:_0,125" = 0.125,
+"Intermediær_MIC:_0,25" = 0.25,
+"Intermediær_MIC:_0,5" = 0.5,
+"Intermediær_MIC:_1" = 1,
+"Intermediær_MIC:_2" = 2,
+"nd" = NA,
+"Resistent_MIC:_4" = 4,
+"Resistent_MIC:_8" = 8,
+"Sensitiv_MIC:_0,008" = 0.008,
+"Sensitiv_MIC:_0,016" = 0.016,
+"Sensitiv_MIC:_0,032" = 0.032,
+"Sensitiv_MIC:_0,064" = 0.064)
+
+MIC_translate_lappe = c(
+  "16 (24)" = 16,
+"2 (3)" = 2)
+
+Historic_for_study = Norway_historic[,c("Fasta_navn","ÅR","PG_MIC","PG_Lappediff")]
+Historic_for_study$Country=rep("Norway_historic",nrow(Historic_for_study))
+Historic_for_study = Historic_for_study[,c(1,2,5,3,4)]
+#Find weird names
+indexes_to_replace = which(Historic_for_study$PG_MIC %in% names(MIC_translate))
+#Translate them to numeric values.
+Historic_for_study$PG_MIC[indexes_to_replace] =
+  MIC_translate[Historic_for_study$PG_MIC[indexes_to_replace]]
+Historic_for_study$PG_MIC%in% names(MIC_translate)
+
+
+#Norway routine.
+#1. Lots of missing data.
+Routine_for_study = Norway_routine
+Routine_for_study = Routine_for_study[,c("Fasta_file","Year","PenG_MIC")]
+Routine_for_study$Country=rep("Norway_routine",nrow(Routine_for_study))
+Routine_for_study = Routine_for_study[,c(1,2,4,3)]
+table(Routine_for_study$PenG_MIC) #Missing data for 556 isolates
+
+# Combined dataset.
+# Requires data to be ordered by isolate name (fasta identifier). 
+# Rebecca suggsted that we also include the Ast_penicillin column as these affect the MIC 
+total_data = rbind(as.matrix(SA_for_study),
+                   as.matrix(Maela_for_study),
+                   as.matrix(USA_for_study),
+                   as.matrix(Massachusetts_for_study),
+                   as.matrix(Routine_for_study),
+                   as.matrix(Historic_for_study[,1:4]))
+colnames(total_data)=c("fasta_name","Date","Country", "Penicillin_MIC")
+#We are missing data on 876 + 16 isolates
+total_data=as.data.frame(total_data)
+
+# Remove extra metadata
+library(stringr)
+# We removed quite a few isolates from filtering, and metadata spanned more than the isolates we used.
+# 1. define identifier in matching format for the isolates we kept
+identifier_in_filtered_collection = read.csv("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/Om_samlingen/files_in_filtered_collection.txt", sep="\t",header=F)
+sample_ids = str_replace(identifier_in_filtered_collection$V1,".fasta", "")
+# 2. define identifier in matching format for metadata
+metadata_ids = str_replace(total_data$fasta_name, ".fasta","")
+# 3. match samples ids to the metadata
+match_in_row = unlist(lapply(sample_ids, FUN = function(x) which(x == metadata_ids)))
+write.table(sample_ids[which((sample_ids %in% metadata_ids)==FALSE)],file = "/Users/magnusnygardosnes/Dropbox/Postdoc_pneumococcus/00_Collection_overview/remove_historic_with_missing_metadata.txt", row.names = F, quote=F,col.names = F)
+
+#Wrong metadata among these matches
+#total_data[10747:10751,]
+#total_data[10568:10572,]
+
+# 4. retain only indexes that matched in metadata.
+total_data = total_data[match_in_row,]
+write.table(total_data,"~/Dropbox/Postdoc_pneumococcus/00_Collection_overview/total_metadata_processed_and_combined.csv")
+
+```
+
+## Project summary
+
+The goal of this project is to determine mutations and factors that are involved in penicillin resistance. We have collected a data set with isolates that are susceptible, intermediate resistant and resistant to Penicillin G. We included isolates that have been analysed in previous studies in addition to new isolates from routine sequencing in Norway. In addition, we sequenced historic isolates that have been stored at the Norwegian Institute of public health. In total the collection consists of 9316 genomes, with sampling dates and antibiotic resistance profiles summarized below.
+
+```{r}
+library(shiny)
+library(plotly)
+library(wesanderson)
+# Define a function that takes a data frame and a country name
+# as input, filters the data based on the country name, and
+# creates a stacked bar plot of the data
+#
+plot_data_by_country <- function(data, country) {
+  
+  #Debug
+  #data=total_data; country="South Africa";
+  
+  # Filter the data based on the country name
+  data_subset <- data[data$Country == country, ]
+  
+  # Convert the Date column to numeric values
+  data_subset$Date = as.numeric(data_subset$Date)
+  
+  # Find the minimum and maximum values in the Date column and expand axes +-1
+  mind = min(data_subset$Date,na.rm=T) - 2
+  maxd = max(data_subset$Date,na.rm=T) + 1
+  
+  # Create a sequence of breaks for the x-axis
+  breaks = seq(mind, maxd, 1)
+  
+  # Create the colors vector
+  values = c("#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#7FDBFF", "#B10DC9")
+
+  # Set the names of the vector to the country names
+  names(values) = c("Maela", "Massachusetts", "Norway_historic","Norway_routine", "South Africa", "USA")
+  as.character(values[country])
+  # Print the vector
+  
+  # Create a stacked bar plot of the Date column
+  g1 = ggplot(data_subset, aes(x = Date,fill=as.character(values[country]))) +
+    geom_bar(position = "stack", aes(x = Date)) +
+    theme_bw() +
+    stat_bin(aes(x = Date), breaks = breaks) +
+    scale_fill_manual(values = as.character(values[country]))+
+    scale_x_binned(breaks = breaks, limits = c(mind, maxd), expand = c(0, 0))+ theme(axis.text.x = element_text(angle = 60, hjust = 1), legend.position="none")
+  
+  # Under the ggplot hood:
+  under_the_hood = ggplot_build(g1)
+  
+  # Find the maximum count of observations in each bin
+  max_y = max(under_the_hood$data[[1]]$count)
+  
+  # Set the y-axis limits to be 20% above the maximum count
+  g1 = g1 + scale_y_continuous(expand = c(0, 0), limits = c(0, max_y * 1.2))
+  
+  # Return the plot
+  g1
+}
+
+plot_data_by_country_interactive <- function(data, country) {
+  # Create the ggplot bar plot
+  ggplot_plot <- plot_data_by_country(data, country)
+  
+  # Convert the ggplot plot to an interactive plotly plot
+  ggplotly(ggplot_plot)
+}
+
+
+# Define a function that takes a data frame and a country name
+# as input, filters the data based on the country name, and
+# creates a stacked bar plot of the MIC data
+#>0.06 = "non susceptible"
+# >2 = "resistant"
+plot_MIC_by_country <- function(data, country) {
+  #Debug
+  #data=total_data; country="Norway_historic";
+  
+  # Filter the data based on the country name
+  data_subset <- data[data$Country == country, ]
+  
+  #
+  data_subset$Penicillin_MIC <- as.numeric(data_subset$Penicillin_MIC)
+  t1 = table(data_subset$Penicillin_MIC)
+  t1 = as.data.frame(t1)
+  colnames(t1)=c("Penicillin_MIC", "Counts")
+  
+  t1$Penicillin_MIC <- as.numeric(as.character(t1$Penicillin_MIC))
+  
+  # Sort the values
+  t1 <- t1[order(t1$Penicillin_MIC), ]
+  
+  #Define color groups
+  t1$group <- ifelse(t1$Penicillin_MIC < 0.02, "Susceptible",
+                   ifelse(t1$Penicillin_MIC < 2, "Non-susceptible", "Resistant"))
+  # Convert the numeric values back to a factor variable
+  t1$Penicillin_MIC <- factor(t1$Penicillin_MIC)
+  
+  g1 = ggplot(t1, aes(x = Penicillin_MIC, y = Counts,fill=group)) +
+  geom_col() +
+  theme_bw()+scale_fill_manual(values = c("Susceptible" = "blue", "Non-susceptible" = "red", "Resistant" = "dark red"),
+                               labels=c("Susceptible","Non-susceptible","Resistant"))+xlab("Penicilling G MIC")+
+    labs(fill = "Resistance category")+xlab("MIC")+ylab("Number of isolates")+
+    theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+  g1
+}
+
+plot_MIC_by_country_interactive <- function(data, country) {
+  # Create the ggplot bar plot
+  ggplot_plot <- plot_MIC_by_country(data, country)
+  
+  # Convert the ggplot plot to an interactive plotly plot
+  ggplotly(ggplot_plot) %>%
+    layout(legend = list(orientation = "h", x = 0.25, y =-1))
+}
+
+plot_years_stacked_country <- function(data) {
+  
+  # Filter the data based on the country name
+  data_subset <- data
+  
+  # Convert the Date column to numeric values
+  data_subset$Date = as.numeric(data_subset$Date)
+  
+  # Find the minimum and maximum values in the Date column and expand axes +-1
+  mind = min(data_subset$Date,na.rm=T) - 2
+  maxd = max(data_subset$Date,na.rm=T) + 1
+  
+  # Create a sequence of breaks for the x-axis
+  breaks = seq(mind, maxd, 1)
+  # Create a stacked bar plot of the Date column
+  g1 = ggplot(data_subset, aes(x = Date,fill=Country)) +
+    geom_bar(position = "stack", aes(x = Date)) +
+    theme_bw() +
+    stat_bin(aes(x = Date), breaks = breaks) +
+    scale_fill_manual(values=c("#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#7FDBFF", "#B10DC9"),
+                    labels=c("Maela", "Massachusetts", "Norway historic", "Norway routine", "South Africa", "USA"))+
+    scale_x_binned(breaks = breaks, limits = c(mind, maxd), expand = c(0, 0))+ theme(axis.text.x = element_text(angle = 60, hjust = 1), legend.position="top")
+  
+  # Under the ggplot hood:
+  under_the_hood = ggplot_build(g1)
+  
+  # Find the maximum count of observations in each bin
+  max_y = max(under_the_hood$data[[1]]$count)
+  
+  # Set the y-axis limits to be 20% above the maximum count
+  g1 = g1 + scale_y_continuous(expand = c(0, 0), limits = c(0, 2000))
+  
+  # Return the plot
+  g1
+}
+
+##
+# plot_data_by_country(total_data, "Norway_historic")
+# plot_data_by_country(total_data, "Norway_routine")
+# plot_data_by_country(total_data, "Maela")
+# plot_data_by_country(total_data, "South Africa")
+# plot_data_by_country(total_data, "Massachusetts")
+# plot_data_by_country(total_data, "USA")
+
+
+
+```
+
+## Collection dates individual countries
+
+```{r}
+library(shiny)
+
+tabsetPanel(
+  tabPanel("Norway routine", plot_data_by_country_interactive(total_data, country = "Norway_routine")),
+  tabPanel("Norway historic", plot_data_by_country_interactive(total_data, country = "Norway_historic")),
+  tabPanel("Maela", plot_data_by_country_interactive(total_data, country = "Maela")),
+  tabPanel("South Africa", plot_data_by_country_interactive(total_data, country = "South Africa")),
+  tabPanel("Massachusetts", plot_data_by_country_interactive(total_data, country = "Massachusetts")),
+  tabPanel("USA", plot_data_by_country_interactive(total_data, country = "USA")),
+  type = "pills"
+)
+
+```
+
+## Collection dates all countries
+
+```{r}
+
+plot_years_stacked_country(total_data)
+
+```
+
+## MIC values individual countries
+
+```{r}
+library(shiny)
+#
+tabsetPanel(
+    tabPanel("Norway historic", plot_MIC_by_country_interactive(total_data, "Norway_historic")),
+    tabPanel("Norway routine", plot_MIC_by_country_interactive(total_data, "Norway_routine")),
+    tabPanel("Maela", plot_MIC_by_country_interactive(total_data, "Maela")),
+    tabPanel("South Africa", plot_MIC_by_country_interactive(total_data, "South Africa")),
+    tabPanel("Massachusetts", plot_MIC_by_country_interactive(total_data, "Massachusetts")),
+    tabPanel("USA", plot_MIC_by_country_interactive(total_data, "USA")),
+    type = "pills"
+  )
+
+```
+
+![](legendMIC.png){.figure .align-center}
+
+<!-- ### Isolates from Norway -->
+
+<!-- From Norway we included historic isolates and isolates from routine sequencing. -->
+
+<!-- 1142 isolates historic isolates: -->
+
+<!-- ```{r} -->
+
+<!-- #Test -->
+
+<!-- labs = seq(1980,2020,1) -->
+
+<!-- labs= rep("", length(labs)) -->
+
+<!-- labs[seq(1,length(labs),5)]=seq(1980,2020,5) -->
+
+<!-- ggplot(total_data,aes(x=ÅR))+ -->
+
+<!--   geom_bar(position="stack",aes(x=ÅR))+ -->
+
+<!--   theme_bw()+scale_x_binned(breaks=seq(1980,2020,1),limits=c(1980,2020), expand=c(0,0),labels =labs)+ -->
+
+<!--   scale_y_continuous(expand=c(0,0),limits=c(0,60)) -->
+
+<!-- ##GGplot is useless for piecharts. -->
+
+<!-- pie(table(Historic_for_study$PG_MIC), cex=0.7) -->
+
+<!-- pie(table(Historic_for_study$PG_Lappediff), cex=0.7) -->
+
+<!-- ``` -->
+
+<!-- 1312 isolates from routine surveillance: -->
+
+<!-- ```{r } -->
+
+<!-- library(ggplot2) -->
+
+<!-- #Test -->
+
+<!-- ggplot(Routine_for_study,aes(x=Year))+ -->
+
+<!--   geom_bar(position="stack",aes(x=Year))+ -->
+
+<!--   theme_bw()+scale_x_binned(breaks=seq(2017,2022,1),limits=c(2017,2022), expand=c(0,0))+ -->
+
+<!--   scale_y_continuous(expand=c(0,0),limits=c(0,500)) -->
+
+<!-- ##GGplot is useless for piecharts. -->
+
+<!-- pie(table(Routine_for_study$PenG_MIC), cex=0.7) -->
+
+<!-- ``` -->
+
+<!-- ### Isolates from South Africa  -->
+
+<!-- 1569 isolates from South Africa -->
+
+<!-- ```{r } -->
+
+<!-- library(ggplot2) -->
+
+<!-- #Test -->
+
+<!-- ggplot(SA_for_study,aes(x=Year))+ -->
+
+<!--   geom_bar(position="stack",aes(x=Year))+ -->
+
+<!--   theme_bw()+scale_x_binned(breaks=seq(2003,2015,1),limits=c(2003,2015), expand=c(0,0))+ -->
+
+<!--   scale_y_continuous(expand=c(0,0),limits=c(0,400)) -->
+
+<!-- ##GGplot is useless for piecharts. -->
+
+<!-- pie(table(SA_for_study$Penicillin), cex=0.5) -->
+
+<!-- ``` -->
+
+<!-- ### Isolates from the United States -->
+
+<!-- 1595 isolates from the United states -->
+
+<!-- ```{r} -->
+
+<!-- library(ggplot2) -->
+
+<!-- #Test -->
+
+<!-- ggplot(USA_for_study,aes(x=Year))+ -->
+
+<!--   geom_bar(stat="count",width = 1)+ -->
+
+<!--   theme_bw() -->
+
+<!-- ##GGplot is useless for piecharts. -->
+
+<!-- pie(table(USA_for_study$PEN), cex=0.5) -->
+
+<!-- ``` -->
+
+<!-- ### Isolates from the Massachusetts -->
+
+<!-- 616 isolates from Massachusetts  -->
+
+<!-- ```{r} -->
+
+<!-- library(ggplot2) -->
+
+<!-- #Test -->
+
+<!-- ggplot(Massachusetts_for_study,aes(x=`Year of Isolation`))+ -->
+
+<!--   geom_bar(position="stack",aes(x=`Year of Isolation`))+ -->
+
+<!--   theme_bw()+scale_x_binned(breaks=seq(2000,2010,1),limits=c(2000,2010), expand=c(0,0))+ -->
+
+<!--   scale_y_continuous(expand=c(0,0),limits=c(0,400)) -->
+
+<!-- ##GGplot is useless for piecharts. -->
+
+<!-- pie(table(Massachusetts_for_study$`Benzylpenicillin MIC (μg/mL)`), cex=0.5) -->
+
+<!-- ``` -->
+
+<!-- ## Total collection -->
+
+<!-- ```{r} -->
+
+<!-- color_mapping_locations = c("Maela"="#FF7F00", "Massachusetts"="#A6CEE3", "Norway_historic"="#1F78B4", -->
+
+<!--                             "Norway_routine"="#B2DF8A","Africa"="#33A02C","USA"="#FB9A99","nd"="black") -->
+
+<!-- labs = seq(1980,2025,1) -->
+
+<!-- labs= rep("", length(labs)) -->
+
+<!-- labs[seq(1,length(labs),5)]=seq(1980,2025,5) -->
+
+<!-- main_plot2 = ggplot(data = total_data) + -->
+
+<!--   geom_bar(position="stack",aes(x=as.numeric(Date), fill=Country)) +  -->
+
+<!--   scale_fill_manual("location", values=color_mapping_locations) + -->
+
+<!--   theme_bw()+xlab("")+ylab("Number of sequences")+theme(legend.position = "top") +  -->
+
+<!--   scale_x_binned(breaks=seq(1980,2025,1),limits=c(1980,2025), expand=c(0,0),labels =labs)+xlab("Collection date") -->
+
+<!-- main_plot2 -->
+
+<!-- ``` -->
+
+<!--  <!-- ![Intergalactic train](intergalactic4.png "Test") -->

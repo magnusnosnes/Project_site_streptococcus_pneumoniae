@@ -1,0 +1,4 @@
+- source: project
+  netlify:
+    - id: 2db53190-9ad6-4982-91a9-21b34aa6ca0b
+      url: 'https://disentangling-amr-streptococcus.netlify.app'

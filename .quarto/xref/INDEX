@@ -1,0 +1,23 @@
+{
+  "posts/03_pbps/pbps.qmd": {
+    "pbps.html": "07ecea6a"
+  },
+  "posts/01_data_overview/data_overview.qmd": {
+    "data_overview.html": "9fdf46e2"
+  },
+  "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.qmd": {
+    "GPSC_Serotypes_etc.html": "f2ed163e"
+  },
+  "index.qmd": {
+    "index.html": "03882273"
+  },
+  "about.qmd": {
+    "about.html": "1f572300"
+  },
+  "posts/04_GWAS/GWAS.qmd": {
+    "GWAS.html": "cacd34c4"
+  },
+  "posts/05_Sequences_of_interest/SOI.qmd": {
+    "SOI.html": "a528284f"
+  }
+}
