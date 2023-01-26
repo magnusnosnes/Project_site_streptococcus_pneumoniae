@@ -26,9 +26,9 @@ format:
 
 # Overview
 
-In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is KhpB, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS. It was found that when pbp2b is transferred to a strain, EloR acquires a 50 bp deletion.
+In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is KhpB, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS.
 
-To understand the impact of this deletion on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies. A shorter gene length would indicate the presence of the 50 bp deletion or other modifications to the protein.
+To understand the impact of different variants of KhpB on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies.
 
 ## KhpB sequence length and MIC
 
