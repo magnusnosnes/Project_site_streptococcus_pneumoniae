@@ -43,6 +43,7 @@ The following plots presents an analysis of GPSC clusters, serotypes and MLST fo
 # Load the required packages
 library(ggplot2)
 library(dplyr)
+library(shiny)
 
 file_names <- c("GPSC_massachusetts.csv", "GPSC_Maela.csv", "GPSC_SouthAfrica.csv", "GPSC_USA.csv", "GPSC_Norway_historic.csv", "GPSC_Norway_routine.csv")
 
@@ -232,74 +233,135 @@ make_interactive_barplot <- function(data, column, dataset) {
   ggplotly(ggplot_plot)
 }
 #
+
 ```
 
 ## GPSC clusters
 
+::: {.panel-tabset style="width:125%"}
+
+## Norway historic
+
 ```{r}
-library(shiny)
-
-#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
-#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
-# # Create the tabset panel
-
-tabsetPanel(
-  tabPanel("Norway historic", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")),
-  tabPanel("Norway routine", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")),
-  tabPanel("Maela", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")),
-  tabPanel("Massachusetts", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")),
-  tabPanel("SouthAfrica", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")),
-  tabPanel("USA", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")),
-  type="pills"
-)
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
 ```
+
+## Norway routine
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
+```
+
+## Maela
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
+```
+
+## Massachusetts
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")
+```
+
+## South Africa
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
+```
+
+## The USA
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
+```
+
+:::
 
 ## Serotypes
 
+::: {.panel-tabset style="width:125%"}
+
 ```{r}
-library(shiny)
-
-#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
-# # Create the tabset panel
-
-tabsetPanel(
-  tabPanel("Norway historic", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Norway_historic")),
-  tabPanel("Norway routine", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Norway_routine")),
-  tabPanel("Maela", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Maela")),
-  tabPanel("Massachusetts", make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")),
-  tabPanel("SouthAfrica", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "SouthAfrica")),
-  tabPanel("USA", make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "USA")),
-  type="pills"
-)
 ```
+
+## Norway historic
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Norway_historic")
+```
+
+## Norway routine
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Norway_routine")
+```
+
+## Maela
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "Maela")
+```
+
+## Massachusetts
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Strain", dataset = "massachusetts")
+```
+
+## South Africa
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "SouthAfrica")
+```
+
+## The USA
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "Serotype", dataset = "USA")
+```
+
+:::
+
 
 ## MLST
 
+::: {.panel-tabset style="width:125%"}
+
+## Norway historic
+
 ```{r}
-library(shiny)
-
-#make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_historic")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Norway_routine")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "Maela")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "SouthAfrica")
-# make_interactive_barplot(data = Metadata, column = "Strain", dataset = "USA")
-# # Create the tabset panel
-
-tabsetPanel(
-  tabPanel("Norway historic", make_interactive_barplot(data = Metadata, column = "ST", dataset = "Norway_historic")),
-  tabPanel("Norway routine", make_interactive_barplot(data = Metadata, column = "ST", dataset = "Norway_routine")),
-  tabPanel("Maela", make_interactive_barplot(data = Metadata, column = "ST", dataset = "Maela")),
-  tabPanel("Massachusetts", make_interactive_barplot(data = Metadata, column = "ST", dataset = "massachusetts")),
-  tabPanel("SouthAfrica", make_interactive_barplot(data = Metadata, column = "ST", dataset = "SouthAfrica")),
-  tabPanel("USA", make_interactive_barplot(data = Metadata, column = "ST", dataset = "USA")),
-  type="pills"
-)
+make_interactive_barplot(data = Metadata, column = "ST", dataset = "Norway_historic")
 ```
+
+## Norway routine
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "ST", dataset = "Norway_routine")
+```
+
+## Maela
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "ST", dataset = "Maela")
+```
+
+## Massachusetts 
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "ST", dataset = "massachusetts")
+```
+
+## South Africa
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "ST", dataset = "SouthAfrica")
+```
+
+## The USA
+
+```{r}
+make_interactive_barplot(data = Metadata, column = "ST", dataset = "USA")
+```
+
+:::

@@ -372,22 +372,6 @@ plot_years_stacked_country <- function(data) {
 
 ```
 
-## Collection dates individual countries
-
-```{r}
-library(shiny)
-
-tabsetPanel(
-  tabPanel("Norway routine", plot_data_by_country_interactive(total_data, country = "Norway_routine")),
-  tabPanel("Norway historic", plot_data_by_country_interactive(total_data, country = "Norway_historic")),
-  tabPanel("Maela", plot_data_by_country_interactive(total_data, country = "Maela")),
-  tabPanel("South Africa", plot_data_by_country_interactive(total_data, country = "South Africa")),
-  tabPanel("Massachusetts", plot_data_by_country_interactive(total_data, country = "Massachusetts")),
-  tabPanel("USA", plot_data_by_country_interactive(total_data, country = "USA")),
-  type = "pills"
-)
-
-```
 
 ## Collection dates all countries
 
@@ -397,22 +381,95 @@ plot_years_stacked_country(total_data)
 
 ```
 
-## MIC values individual countries
+## Collection dates individual countries
+::: {.panel-tabset style="width:100%"}
+
+
+## Norway routine
 
 ```{r}
-library(shiny)
-#
-tabsetPanel(
-    tabPanel("Norway historic", plot_MIC_by_country_interactive(total_data, "Norway_historic")),
-    tabPanel("Norway routine", plot_MIC_by_country_interactive(total_data, "Norway_routine")),
-    tabPanel("Maela", plot_MIC_by_country_interactive(total_data, "Maela")),
-    tabPanel("South Africa", plot_MIC_by_country_interactive(total_data, "South Africa")),
-    tabPanel("Massachusetts", plot_MIC_by_country_interactive(total_data, "Massachusetts")),
-    tabPanel("USA", plot_MIC_by_country_interactive(total_data, "USA")),
-    type = "pills"
-  )
-
+plot_data_by_country_interactive(total_data, country = "Norway_routine")
 ```
+
+## Norway historic
+
+```{r}
+plot_data_by_country_interactive(total_data, country = "Norway_historic")
+```
+
+## Maela
+
+```{r}
+plot_data_by_country_interactive(total_data, country = "Maela")
+```
+
+## South Africa
+
+```{r}
+plot_data_by_country_interactive(total_data, country = "South Africa")
+```
+
+## Massachusetts
+
+```{r}
+plot_data_by_country_interactive(total_data, country = "Massachusetts")
+```
+
+## The USA
+
+```{r}
+plot_data_by_country_interactive(total_data, country = "USA")
+```
+
+:::
+
+
+
+## MIC values individual countries
+
+::: {.panel-tabset style="width:100%"}
+
+
+## Norway historic
+
+```{r}
+plot_MIC_by_country_interactive(total_data, "Norway_historic")
+```
+
+## Norway routine
+
+```{r}
+plot_MIC_by_country_interactive(total_data, "Norway_routine")
+```
+
+## Maela
+
+```{r}
+plot_MIC_by_country_interactive(total_data, "Maela")
+```
+
+
+## South Africa
+
+```{r}
+plot_MIC_by_country_interactive(total_data, "South Africa")
+```
+
+
+## Massachusetts
+
+```{r}
+plot_MIC_by_country_interactive(total_data, "Massachusetts")
+```
+
+## The USA
+
+```{r}
+plot_MIC_by_country_interactive(total_data, "USA")
+```
+
+:::
+
 
 ![](legendMIC.png){.figure .align-center}
 

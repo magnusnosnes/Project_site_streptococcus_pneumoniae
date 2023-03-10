@@ -105,7 +105,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
   <ul class="collapse">
   <li><a href="#khpb-sequence-length-and-mic" id="toc-khpb-sequence-length-and-mic" class="nav-link" data-scroll-target="#khpb-sequence-length-and-mic">KhpB sequence length and MIC</a></li>
-  <li><a href="#khpb-amino-acid-length-and-mic" id="toc-khpb-amino-acid-length-and-mic" class="nav-link" data-scroll-target="#khpb-amino-acid-length-and-mic">KhpB amino acid length and MIC</a></li>
+  <li><a href="#elor-amino-acid-length-and-mic" id="toc-elor-amino-acid-length-and-mic" class="nav-link" data-scroll-target="#elor-amino-acid-length-and-mic">EloR amino acid length and MIC</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   </ul></li>
   </ul>
@@ -142,8 +142,8 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="overview" class="level1">
 <h1>Overview</h1>
-<p>In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is KhpB, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS.</p>
-<p>To understand the impact of different variants of KhpB on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies.</p>
+<p>In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is EloR, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS.</p>
+<p>To understand the impact of different variants of EloR on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies.</p>
 <section id="khpb-sequence-length-and-mic" class="level2">
 <h2 class="anchored" data-anchor-id="khpb-sequence-length-and-mic">KhpB sequence length and MIC</h2>
 <div class="cell">
@@ -154,46 +154,46 @@ ul.task-list li input[type="checkbox"] {
 <div id="fig-blast_search" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="SOI_files/figure-html/fig-blast_search-1.png" class="img-fluid figure-img" width="960"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Blast search of assemblies against the full eloR sequence. The figure shows the relationship between the gene length and alignment length of the protein KhpB/eloR and the Minimum Inhibitory Concentration (MIC) of the isolates in our database. Panel A displays a scatter plot of the gene length and MIC, with the points plotted in red. Panel B displays a scatter plot of the alignment length and MIC, with the points plotted in blue.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Blast search of assemblies against the full eloR sequence. The figure shows the relationship between the gene length and alignment length of the protein Elor/eloR and the Minimum Inhibitory Concentration (MIC) of the isolates in our database. Panel A displays a scatter plot of the gene length and MIC, with the points plotted in red. Panel B displays a scatter plot of the alignment length and MIC, with the points plotted in blue.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>As seen in <a href="#fig-blast_search">Figure&nbsp;1</a>, there is no apparent correlation between the gene length of KhpB and the observed penicillin MIC. In fact, we see that most of the high MIC levels is observed around the normal gene length (approximately 986 base pairs).</p>
+<p>As seen in <a href="#fig-blast_search">Figure&nbsp;1</a>, there is no apparent correlation between the gene length of Elor and the observed penicillin MIC. In fact, we see that most of the high MIC levels is observed around the normal gene length (approximately 986 base pairs).</p>
 <div class="cell">
 
 </div>
 </section>
-<section id="khpb-amino-acid-length-and-mic" class="level2">
-<h2 class="anchored" data-anchor-id="khpb-amino-acid-length-and-mic">KhpB amino acid length and MIC</h2>
-<p>Next we searched directly for the protein “KhpB” in the annotated assemblies and inspected the length of the amino acid sequence. For example, if the amino acid sequence of any was significantly shorter than the typical distribution length, it may suggest a potential correlation with increased MIC.</p>
-<p>In 26 of the annotated assemblies, KhpB was split and the first domain of the KhpB protein was annotated as “jag”.</p>
+<section id="elor-amino-acid-length-and-mic" class="level2">
+<h2 class="anchored" data-anchor-id="elor-amino-acid-length-and-mic">EloR amino acid length and MIC</h2>
+<p>Next we searched directly for the EloR (annotated as EloR using Bakta) in the annotated assemblies and inspected the length of the amino acid sequence. For example, if the amino acid sequence of any was significantly shorter than the typical distribution length, it may suggest a potential correlation with increased MIC.</p>
+<p>In 26 of the annotated assemblies, EloR was split and the first domain of the EloR protein was annotated as “jag”.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-boxplot" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="SOI_files/figure-html/fig-boxplot-1.png" class="img-fluid figure-img" width="960"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: Distribution of Penicillin G resistance KhpB and jag annotations. The x-axis represents the gene of interest and the y-axis represents the resistance level to Penicillin G.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Distribution of Penicillin G resistance Elor and jag annotations. The x-axis represents the gene of interest and the y-axis represents the resistance level to Penicillin G.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-boxplot">Figure&nbsp;2</a> shows that most of the high penicillin resistance levels are in the KhpB annotations. Next we look at the gene length:</p>
+<p><a href="#fig-boxplot">Figure&nbsp;2</a> shows that most of the high penicillin resistance levels are in the Elor annotations. Next we look at the gene length:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-gene_length" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="SOI_files/figure-html/fig-gene_length-1.png" class="img-fluid figure-img" width="960"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3: The relationship between the length of the gene in terms of amino acids and the resistance levels to Penicillin G. The x-axis represents the length of the gene in terms of amino acids, the y-axis represents the resistance level to Penicillin G. The color of the points indicates if the annotation was KhpB was split to jag or just annotated khpB.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: The relationship between the length of the gene in terms of amino acids and the resistance levels to Penicillin G. The x-axis represents the length of the gene in terms of amino acids, the y-axis represents the resistance level to Penicillin G. The color of the points indicates if the annotation was Elor was split to jag or just annotated Elor.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-gene_length">Figure&nbsp;3</a> shows that most of the high penicillin resistance levels are observed for normal length variants of the KhpB protein. Most of the high MIC isolates have 328 amino acids in KhpB.</p>
+<p><a href="#fig-gene_length">Figure&nbsp;3</a> shows that most of the high penicillin resistance levels are observed for normal length variants of the Elor protein. Most of the high MIC isolates have 328 amino acids in EloR.</p>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>In this analysis, we studied specific genes of interest identified by our colleagues at NMBU, focusing on the protein KhpB and its correlation with pbp2b, a protein known to play a role in increasing Minimum Inhibitory Concentration (MIC). We set up a BLAST database for eloR, extracted matches and the gene length of the match in the respective assemblies, and searched for the protein “KhpB” in annotated assemblies to inspect the length of the amino acid sequence. Our results showed that there is no clear relationship between the gene length of KhpB and the observed penicillin MIC, and most of the high MIC levels were observed around the normal gene length. Additionally, we found that most of the high penicillin resistance levels were in the KhpB annotations, with most high MIC isolates having 328 amino acids in KhpB.</p>
+<p>In this analysis, we studied specific genes of interest identified by our colleagues at NMBU, focusing on the protein Elor and its correlation with pbp2b, a protein known to play a role in increasing Minimum Inhibitory Concentration (MIC). We set up a BLAST database for EloR, extracted matches and the gene length of the match in the respective assemblies, and searched for the protein “Elor” in annotated assemblies to inspect the length of the amino acid sequence. Our results showed that there is no clear relationship between the gene length of Elor and the observed penicillin MIC, and most of the high MIC levels were observed around the normal gene length. Additionally, we found that most of the high penicillin resistance levels were in the Elor annotations, with most high MIC isolates having 328 amino acids in Elor.</p>
 
 
 </section>

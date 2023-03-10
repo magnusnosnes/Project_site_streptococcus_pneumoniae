@@ -20,42 +20,30 @@ This page describes a subset of the analyses for the paper *The inter-continenta
 
 ### [Transmission lineages and metadata exploration](https://magnunos.shinyapps.io/LineageHomology_Explorer)
 
-
 [<img src="Files/TL_Explorer.png" width="500"/>](https://magnunos.shinyapps.io/LineageHomology_Explorer)
-
 
 The R-shiny app above displays the estimated [transmission lineages](https://www.science.org/doi/10.1126/science.abf2946), their size, the estimated time they arrived in the focal location. It can be used to explore single transmission lineages, and the metadata of the observed sequences from those lineages. To estimate the transmission lineages we have used the R-package [LineageHomology](https://github.com/magnusnosnes/LineageHomology).
 
 ### [Transmission lineage statistics](Analyses/06_transmission_lineage_stats.html)
+
 [<img src="Files/power_laws.png" width="500"/>](Analyses/06_transmission_lineage_stats.html)
 
-Here we look into the number of local cases that can be explained by the largest transmission lineages and how many can be explained by singletons. Additionally we look at the distribution of transmission lineage sizes. 
-
-
+Here we look into the number of local cases that can be explained by the largest transmission lineages and how many can be explained by singletons. Additionally we look at the distribution of transmission lineage sizes.
 
 ### [Import, export and local transmission analyses](Analyses/03_import_analysis_io.html)
 
-
 [<img src="Files/import_export_localTransmission.jpg" width="500"/>](Analyses/03_import_analysis_io.html)
 
-This analysis provides estimates of the total number of imports, exports and local transmissions in each location. Additionally we use the transmission lineages to derive how importation, exportation, and local transmission has varied in recent time. 
-
-
+This analysis provides estimates of the total number of imports, exports and local transmissions in each location. Additionally we use the transmission lineages to derive how importation, exportation, and local transmission has varied in recent time.
 
 ### [Growth rate of lineages and relation to metadata](Analyses/04_growth_rate_analysis.html)
 
 [<img src="Files/Metadata.png" width="500"/>](Analyses/Growth_rates_explanatory.html)
 
-
-This analysis explores the relation of the growth rate of effective population size of the transmission lineages 2000-2017. We extract phylodynamic estimates of the growth rate TLs, and run regression analyses to estimate how location, gender distribution and the importation genes *penA* and *mtr* could have contributed to transmission lineage growth. 
-
-
+This analysis explores the relation of the growth rate of effective population size of the transmission lineages 2000-2017. We extract phylodynamic estimates of the growth rate TLs, and run regression analyses to estimate how location, gender distribution and the importation genes *penA* and *mtr* could have contributed to transmission lineage growth.
 
 ### [Global metadata analysis](Analyses/05_global_analysis.html)
 
-
 [<img src="Files/Global_analysis.png" width="500"/>](Analyses/05_global_analysis.html)
 
-
-This section displays the full phylogenetic tree and associated metadata. Here we define important clades based on the observed metadata and phylogeny. The "important clades" display specific variants of the genes *mtr* and *penA* MIC category (high or low), which is known to be important for azitromycin and cephalosporin resistance. We estimate the effective population size dynamics to determine the growth of these clades in recent time. 
-
+This section displays the full phylogenetic tree and associated metadata. Here we define important clades based on the observed metadata and phylogeny. The "important clades" display specific variants of the genes *mtr* and *penA* MIC category (high or low), which is known to be important for azitromycin and cephalosporin resistance. We estimate the effective population size dynamics to determine the growth of these clades in recent time.

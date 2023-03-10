@@ -53,7 +53,28 @@
     "href": "posts/03_pbps/pbps.html",
     "title": "Penicillin binding proteins",
     "section": "",
-    "text": "PBPs are a type of protein found in bacteria that bind to penicillin, a type of antibiotic. PBPs play a key role in the synthesis of the bacterial cell wall, and when they bind to penicillin, they can interfere with this process. As a result, the growth and division of the bacterial cells can be impaired, making the antibiotic effective at killing or inhibiting the growth of the bacteria. It is important to note that some bacteria can develop resistance to antibiotics by producing PBPs that are resistant to the effects of the antibiotic. In these cases, the antibiotic may not be effective at killing or inhibiting the growth of the bacteria, making it important to use a different type of antibiotic or to use a combination of antibiotics to effectively treat the infection.\nThe PBPs presented in this document were determined by running Pathogenwatch, which uses a machine learning procedure PBP typing scheme . The visualization provides a representation of the distribution and abundance of the different types of PBPs in our collection.\n\n\n\n\nNorway RoutineNorway historicMaelaSouth AfricaMassachusettsUSA"
+    "text": "PBPs are proteins that can attach to \\(\\beta\\)-lactam antibiotics like penicillin. These proteins are essential for making the bacterial cell wall, and when they are bound by penicillin, the antibiotic can disrupt this process. As a result, the growth and division of the bacterial cells can be impaired, making the antibiotic effective at killing or inhibiting the growth of the bacteria.\nThe PBP types shown in this document were obtained by using Pathogenwatch, which applies a PBP typing scheme developed in (Li et al. 2016) and evaluated in (Li et al. 2017). These studies demonstrated that the PBP types account for most of the variation in observed minimum inhibitory concentration \\(\\beta\\)-lactam antibiotic, and perform better than other typing schemes such as MLST.\nTo identify small and novel mechanisms that contribute to penicillin resistance, it can be helpful to control for major effects. Therefore, it is important to consider PBP composition.\nThis document gives an overview of the PBP types present in collection which will control for in further analyses. The visualization can be used to explore the PBP types, how they are associated with MIC values, and how they are distributed through time in the different studies included in the collection. It is noteworthy that multiple PBP alleles are labelled as “new” in each of the genes PBP1a, PBP2b and PBP2x, and therefore that the effect of this allele composition has not been previously investigated."
+  },
+  {
+    "objectID": "posts/03_pbps/pbps.html#temporal-pbp-composition",
+    "href": "posts/03_pbps/pbps.html#temporal-pbp-composition",
+    "title": "Penicillin binding proteins",
+    "section": "Temporal PBP composition",
+    "text": "Temporal PBP composition\n\nNorway historicNorway routineMaelaSouth AfricaMassachusettsThe USA"
+  },
+  {
+    "objectID": "posts/03_pbps/pbps.html#temporal-pbp-composition-fraction-of-total",
+    "href": "posts/03_pbps/pbps.html#temporal-pbp-composition-fraction-of-total",
+    "title": "Penicillin binding proteins",
+    "section": "Temporal PBP composition (fraction of total)",
+    "text": "Temporal PBP composition (fraction of total)\n\nNorway historicNorway routineMaelaSouth AfricaMassachusettsThe USA"
+  },
+  {
+    "objectID": "posts/03_pbps/pbps.html#temporal-pbp-composition-fraction-of-total-removing-nas",
+    "href": "posts/03_pbps/pbps.html#temporal-pbp-composition-fraction-of-total-removing-nas",
+    "title": "Penicillin binding proteins",
+    "section": "Temporal PBP composition (fraction of total removing NA’s)",
+    "text": "Temporal PBP composition (fraction of total removing NA’s)\n\nNorway historicNorway routineMaelaSouth AfricaMassachusettsThe USA"
   },
   {
     "objectID": "posts/01_data_overview/data_overview.html",
@@ -63,13 +84,6 @@
     "text": "The goal of this project is to determine mutations and factors that are involved in penicillin resistance. We have collected a data set with isolates that are susceptible, intermediate resistant and resistant to Penicillin G. We included isolates that have been analysed in previous studies in addition to new isolates from routine sequencing in Norway. In addition, we sequenced historic isolates that have been stored at the Norwegian Institute of public health. In total the collection consists of 9316 genomes, with sampling dates and antibiotic resistance profiles summarized below."
   },
   {
-    "objectID": "posts/01_data_overview/data_overview.html#collection-dates-individual-countries",
-    "href": "posts/01_data_overview/data_overview.html#collection-dates-individual-countries",
-    "title": "An overview of the data",
-    "section": "Collection dates individual countries",
-    "text": "Collection dates individual countries\n\n\n\n\n\nNorway routine\n\n\nNorway historic\n\n\nMaela\n\n\nSouth Africa\n\n\nMassachusetts\n\n\nUSA"
-  },
-  {
     "objectID": "posts/01_data_overview/data_overview.html#collection-dates-all-countries",
     "href": "posts/01_data_overview/data_overview.html#collection-dates-all-countries",
     "title": "An overview of the data",
@@ -77,11 +91,18 @@
     "text": "Collection dates all countries"
   },
   {
+    "objectID": "posts/01_data_overview/data_overview.html#collection-dates-individual-countries",
+    "href": "posts/01_data_overview/data_overview.html#collection-dates-individual-countries",
+    "title": "An overview of the data",
+    "section": "Collection dates individual countries",
+    "text": "Collection dates individual countries\n\nNorway routineNorway historicMaelaSouth AfricaMassachusettsThe USA"
+  },
+  {
     "objectID": "posts/01_data_overview/data_overview.html#mic-values-individual-countries",
     "href": "posts/01_data_overview/data_overview.html#mic-values-individual-countries",
     "title": "An overview of the data",
     "section": "MIC values individual countries",
-    "text": "MIC values individual countries\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nSouth Africa\n\n\nMassachusetts\n\n\nUSA"
+    "text": "MIC values individual countries\n\nNorway historicNorway routineMaelaSouth AfricaMassachusettsThe USA"
   },
   {
     "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html",
@@ -95,28 +116,28 @@
     "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#gpsc-clusters",
     "title": "Serotypes, GPSC-clusters, and MLST types",
     "section": "GPSC clusters",
-    "text": "GPSC clusters\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nMassachusetts\n\n\nSouthAfrica\n\n\nUSA"
+    "text": "GPSC clusters\n\nNorway historicNorway routineMaelaMassachusettsSouth AfricaThe USA"
   },
   {
     "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#serotypes",
     "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#serotypes",
     "title": "Serotypes, GPSC-clusters, and MLST types",
     "section": "Serotypes",
-    "text": "Serotypes\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nMassachusetts\n\n\nSouthAfrica\n\n\nUSA"
+    "text": "Serotypes\n\nNorway historicNorway routineMaelaMassachusettsSouth AfricaThe USA"
   },
   {
     "objectID": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#mlst",
     "href": "posts/02_gpsc_serotypes_etc/GPSC_Serotypes_etc.html#mlst",
     "title": "Serotypes, GPSC-clusters, and MLST types",
     "section": "MLST",
-    "text": "MLST\n\n\n\n\n\nNorway historic\n\n\nNorway routine\n\n\nMaela\n\n\nMassachusetts\n\n\nSouthAfrica\n\n\nUSA"
+    "text": "MLST\n\nNorway historicNorway routineMaelaMassachusettsSouth AfricaThe USA"
   },
   {
     "objectID": "posts/05_Sequences_of_interest/SOI.html",
     "href": "posts/05_Sequences_of_interest/SOI.html",
     "title": "Sequences of interest",
     "section": "",
-    "text": "In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is KhpB, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS.\nTo understand the impact of different variants of KhpB on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies.\n\n\n\n\n\n\n\n\n\n\nFigure 1: Blast search of assemblies against the full eloR sequence. The figure shows the relationship between the gene length and alignment length of the protein KhpB/eloR and the Minimum Inhibitory Concentration (MIC) of the isolates in our database. Panel A displays a scatter plot of the gene length and MIC, with the points plotted in red. Panel B displays a scatter plot of the alignment length and MIC, with the points plotted in blue.\n\n\n\n\nAs seen in Figure 1, there is no apparent correlation between the gene length of KhpB and the observed penicillin MIC. In fact, we see that most of the high MIC levels is observed around the normal gene length (approximately 986 base pairs).\n\n\n\n\n\n\nNext we searched directly for the protein “KhpB” in the annotated assemblies and inspected the length of the amino acid sequence. For example, if the amino acid sequence of any was significantly shorter than the typical distribution length, it may suggest a potential correlation with increased MIC.\nIn 26 of the annotated assemblies, KhpB was split and the first domain of the KhpB protein was annotated as “jag”.\n\n\n\n\n\nFigure 2: Distribution of Penicillin G resistance KhpB and jag annotations. The x-axis represents the gene of interest and the y-axis represents the resistance level to Penicillin G.\n\n\n\n\nFigure 2 shows that most of the high penicillin resistance levels are in the KhpB annotations. Next we look at the gene length:\n\n\n\n\n\nFigure 3: The relationship between the length of the gene in terms of amino acids and the resistance levels to Penicillin G. The x-axis represents the length of the gene in terms of amino acids, the y-axis represents the resistance level to Penicillin G. The color of the points indicates if the annotation was KhpB was split to jag or just annotated khpB.\n\n\n\n\nFigure 3 shows that most of the high penicillin resistance levels are observed for normal length variants of the KhpB protein. Most of the high MIC isolates have 328 amino acids in KhpB.\n\n\n\nIn this analysis, we studied specific genes of interest identified by our colleagues at NMBU, focusing on the protein KhpB and its correlation with pbp2b, a protein known to play a role in increasing Minimum Inhibitory Concentration (MIC). We set up a BLAST database for eloR, extracted matches and the gene length of the match in the respective assemblies, and searched for the protein “KhpB” in annotated assemblies to inspect the length of the amino acid sequence. Our results showed that there is no clear relationship between the gene length of KhpB and the observed penicillin MIC, and most of the high MIC levels were observed around the normal gene length. Additionally, we found that most of the high penicillin resistance levels were in the KhpB annotations, with most high MIC isolates having 328 amino acids in KhpB."
+    "text": "In this analysis, we investigate specific genes of interest identified by our colleagues at NMBU. One protein of particular interest is EloR, which has been found to have a correlation with pbp2b, a protein is known to play a role in increasing MICS.\nTo understand the impact of different variants of EloR on MIC, we created a BLAST (Basic Local Alignment Search Tool) database for EloR and searched all of our isolates against it. Next we extracted the matches and the gene length of the match in the respective assemblies.\n\n\n\n\n\n\n\n\n\n\nFigure 1: Blast search of assemblies against the full eloR sequence. The figure shows the relationship between the gene length and alignment length of the protein Elor/eloR and the Minimum Inhibitory Concentration (MIC) of the isolates in our database. Panel A displays a scatter plot of the gene length and MIC, with the points plotted in red. Panel B displays a scatter plot of the alignment length and MIC, with the points plotted in blue.\n\n\n\n\nAs seen in Figure 1, there is no apparent correlation between the gene length of Elor and the observed penicillin MIC. In fact, we see that most of the high MIC levels is observed around the normal gene length (approximately 986 base pairs).\n\n\n\n\n\n\nNext we searched directly for the EloR (annotated as EloR using Bakta) in the annotated assemblies and inspected the length of the amino acid sequence. For example, if the amino acid sequence of any was significantly shorter than the typical distribution length, it may suggest a potential correlation with increased MIC.\nIn 26 of the annotated assemblies, EloR was split and the first domain of the EloR protein was annotated as “jag”.\n\n\n\n\n\nFigure 2: Distribution of Penicillin G resistance Elor and jag annotations. The x-axis represents the gene of interest and the y-axis represents the resistance level to Penicillin G.\n\n\n\n\nFigure 2 shows that most of the high penicillin resistance levels are in the Elor annotations. Next we look at the gene length:\n\n\n\n\n\nFigure 3: The relationship between the length of the gene in terms of amino acids and the resistance levels to Penicillin G. The x-axis represents the length of the gene in terms of amino acids, the y-axis represents the resistance level to Penicillin G. The color of the points indicates if the annotation was Elor was split to jag or just annotated Elor.\n\n\n\n\nFigure 3 shows that most of the high penicillin resistance levels are observed for normal length variants of the Elor protein. Most of the high MIC isolates have 328 amino acids in EloR.\n\n\n\nIn this analysis, we studied specific genes of interest identified by our colleagues at NMBU, focusing on the protein Elor and its correlation with pbp2b, a protein known to play a role in increasing Minimum Inhibitory Concentration (MIC). We set up a BLAST database for EloR, extracted matches and the gene length of the match in the respective assemblies, and searched for the protein “Elor” in annotated assemblies to inspect the length of the amino acid sequence. Our results showed that there is no clear relationship between the gene length of Elor and the observed penicillin MIC, and most of the high MIC levels were observed around the normal gene length. Additionally, we found that most of the high penicillin resistance levels were in the Elor annotations, with most high MIC isolates having 328 amino acids in Elor."
   },
   {
     "objectID": "index.html",
@@ -130,6 +151,6 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "Penicillin resistance is a major concern in the field of microbiology, as it poses a threat to the effectiveness of one of the most commonly used antibiotics. Pneumococci, a type of bacteria that can cause pneumonia, are particularly known for their ability to develop resistance to penicillin. In this website, we explore the latest research on the mechanisms of penicillin resistance in pneumococci and how it is related to compensatory adaptation. We combine the fields of genomics and molecular microbiology to better understand these complex processes and their implications for the treatment of bacterial infections.\nThis project will focus specifically on penicillin binding proteins (PBPs), the mechanisms by which they function, and mutations that alter their minimum inhibitory concentrations (MICs). PBPs are enzymes that are responsible for the synthesis of the bacterial cell wall, and they are the primary target of penicillin and other beta-lactam antibiotics. Mutations in the genes encoding these proteins can lead to changes in their structure and function, allowing the bacteria to become resistant to the antibiotics. By studying the genetic and molecular basis of these mutations, we can gain a deeper understanding of the mechanisms of penicillin resistance in pneumococci and develop more effective strategies for combating these infections.\n\nThe research presented on this website is a collaboration between the University of Oslo, the Norwegian Institute of Public Health, and the Norwegian University of Life Sciences. Our team brings together experts in the fields of genomics, molecular microbiology, and public health, who are dedicated to advancing our understanding of antibiotic resistance and improving the treatment of bacterial infections. We are grateful for the support of these institutions, which have provided us with the resources and expertise necessary to conduct this important research."
+    "text": "Penicillin resistance is a major concern in the field of microbiology, as it poses a threat to the effectiveness of one of the most commonly used antibiotics. Pneumococci, a type of bacteria that can cause pneumonia, are particularly known for their ability to develop resistance to penicillin. In this website, we explore the the mechanisms of penicillin resistance in pneumococci and how it is related to compensatory adaptation.\nThis project focuses specifically on penicillin binding proteins (PBPs) and mutations that alter their minimum inhibitory concentrations (MICs). PBPs are enzymes that are responsible for the synthesis of the bacterial cell wall, and they are the primary target of penicillin and other beta-lactam antibiotics. Mutations in the genes encoding these proteins can lead to changes in their structure and function, allowing the bacteria to become resistant to the antibiotics. By studying the genetic and molecular basis of these mutations, we can gain a deeper understanding of the mechanisms of penicillin resistance in pneumococci and develop more effective strategies monitoring development of resistance and for combating these infections.\n\nThe research presented on this website is a collaboration between the University of Oslo, the Norwegian Institute of Public Health, and the Norwegian University of Life Sciences."
   }
 ]

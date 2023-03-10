@@ -2,7 +2,8 @@
 title: "Penicillin binding proteins"
 date: 2022-12-14
 editor: visual
-image: cover.jpg
+image: cover2.png
+bibliography: ../disentangling.bib
 knitr:
   opts_chunk: 
     comment: "#>" 
@@ -15,16 +16,32 @@ execute:
   message: false
 format: 
   html:
-    fig-width: 8
-    fig-height: 12
+    fig-width: 12
+    fig-height: 16
     page-layout: full
+    toc: true
+    toc-location: left
 ---
 
-PBPs are a type of protein found in bacteria that bind to penicillin, a type of antibiotic. PBPs play a key role in the synthesis of the bacterial cell wall, and when they bind to penicillin, they can interfere with this process. As a result, the growth and division of the bacterial cells can be impaired, making the antibiotic effective at killing or inhibiting the growth of the bacteria. It is important to note that some bacteria can develop resistance to antibiotics by producing PBPs that are resistant to the effects of the antibiotic. In these cases, the antibiotic may not be effective at killing or inhibiting the growth of the bacteria, making it important to use a different type of antibiotic or to use a combination of antibiotics to effectively treat the infection.
+## Outline
 
-The PBPs presented in this document were determined by running [Pathogenwatch](https://pathogen.watch/), which uses a machine learning procedure PBP typing scheme . The visualization provides a representation of the distribution and abundance of the different types of PBPs in our collection.
+PBPs are proteins that can attach to $\beta$-lactam antibiotics like penicillin. These proteins are essential for making the bacterial cell wall, and when they are bound by penicillin, the antibiotic can disrupt this process. As a result, the growth and division of the bacterial cells can be impaired, making the antibiotic effective at killing or inhibiting the growth of the bacteria.
 
-```{r remedy001}
+The PBP types shown in this document were obtained by using Pathogenwatch, which applies a PBP typing scheme developed in [@li2016] and evaluated in [@li2017]. These studies demonstrated that the PBP types account for most of the variation in observed minimum inhibitory concentration $\beta$-lactam antibiotic, and perform better than other typing schemes such as MLST.
+
+To identify small and novel mechanisms that contribute to penicillin resistance, it can be helpful to control for major effects. Therefore, it is important to consider PBP composition.
+
+This document gives an overview of the PBP types present in collection which will control for in further analyses. The visualization can be used to explore the PBP types, how they are associated with MIC values, and how they are distributed through time in the different studies included in the collection. It is noteworthy that multiple PBP alleles are labelled as "new" in each of the genes PBP1a, PBP2b and PBP2x, and therefore that the effect of this allele composition has not been previously investigated.
+
+```{r }
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(plotly)
+library(shiny)
+library(highcharter)
+library(tidyverse)
+library(lubridate)
 # Specify the names of the files to read
 filenames <- c("pbps_USA.csv", "pbps_maela.csv", "pbps_massachusetts.csv", 
                "pbps_norway_historic.csv", "pbps_norway_routine.csv", "pbps_south_africa.csv")
@@ -40,38 +57,93 @@ combined_data <- do.call(rbind, data_frames)
 combined_data$dataset = dataset
 
 write.table(combined_data,"~/Dropbox/Postdoc_pneumococcus/00_Collection_overview/PBPs.csv")
+metadata_including_dates = read.table("~/Dropbox/Postdoc_pneumococcus/00_Collection_overview/total_metadata_processed_and_combined.csv")
+
+# Remove .fasta from the genome names
+metadata_including_dates$fasta_name = str_replace_all(metadata_including_dates$fasta_name,".fasta", "")
+
+MIC_dat = read.csv("/Users/magnusnygardosnes/Desktop/Postdoc/Pneumo/06_Pyseer/phenotype.tsv", sep="\t")
+combined_data$dates = metadata_including_dates$Date[match(combined_data$Genome.Name,metadata_including_dates$fasta_name)]
+combined_data$penMIC_observed = MIC_dat$penicillin_G[match(combined_data$Genome.Name, MIC_dat$samples)]
+combined_data$PBP_type = paste0(combined_data$PBP1a,"-",combined_data$PBP2b,"-",combined_data$PBP2x)
+combined_data = combined_data %>% group_by(PBP_type) %>% mutate(PBP_type_median_MIC=median(penMIC_observed, na.rm=T))
+combined_data = combined_data %>% group_by(PBP_type) %>% mutate(PBP_type_mean_MIC=mean(penMIC_observed, na.rm=T))
+combined_data = combined_data %>% group_by(PBP_type) %>% mutate(PBP_type_ranked_MIC=rank(PBP_type_mean_MIC))
+combined_data=as.data.frame(combined_data)
+
+# Look at PBP type MIC distribution
+# table(combined_data$PBP_type,combined_data$penMIC_observed,useNA = "always")
+# table(combined_data$PBP_type,combined_data$penMIC_observed,useNA = "always")
+# table(combined_data %>% filter(dataset=="norway_routine") %>% select(dates,penMIC_observed),useNA="always")
 
 
-#   ____________________________________________________________________________
-#   prompt                                                                  ####
-# My dataset looks like this:
-# 
-#   PBP1a PBP2b PBP2x dataset
-# 1    42    42     8     USA
-# 2     1     0     6     USA
-# 3     2     4     0     USA
-# 
-# I want to make a function that plots barplots of the PBP1a, PBP2b, and the PBP2x columns in the combined dataset. 
-# Use ggplot to do following things: 
-# Define a barplot function called barplot_pbps_in_dataset.
-# Make the barplot function select the rows of the combined data that corresponding to an user input value (string).
-# Make a barplot of PBP1a using ggplot on the the selected rows. Set the title of the plot to PBP1a.
-# Make a barplot of PBP2b using the selected rows. Set the title of the plot to PBP2b.
-# Make a barplot of PBP2x using the selected rows. Set the title of the plot to PBP2x.
-# Arrange the barplots in 3 rows and 1 column, and return the plot to the user.
-# 
-#  [1] "42"  "1"   "2"   "45"  "0"   "NF" "NEW" "208" "141" "111"
-# R-programming language. 
-# Reorder this factor variable by dplyr and sort by the sorting by numeric values. Make any non-numeric values appear last. turn it back into a factor
-# 
-
-#   ____________________________________________________________________________
-#   End prompt                                                              ####
 
 
-library(ggplot2)
-library(gridExtra)
-library(dplyr)
+
+#Check if we have dates now
+#tail(table(combined_data$dates,combined_data$dataset),100)
+
+
+#Set up a palette for the MIC values
+# library(RColorBrewer)
+# n_unique_mic = length(sort(unique(combined_data$PBP_type_mean_MIC)))
+# color_scale <- colorRampPalette(c("blue", "red"))
+# colors <- color_scale(n_unique_mic)
+# colors = c(colors, "NA"="#000000")
+# names(colors)=unique(sort(unique(combined_data$PBP_type_mean_MIC)))
+# match_vector = match(combined_data$PBP_type_mean_MIC, names(colors))
+# match_vector[is.na(match_vector)] = 32
+# combined_data$mic_colors = colors[match_vector]
+# combined_data %>% select(tail(names(combined_data),5))
+
+# Data formatting done.
+
+#Testing a reduced dataset for simpler plotting
+reduced_data = combined_data %>% select(c(dataset,PBP_type,penMIC_observed,PBP_type_median_MIC,PBP_type_mean_MIC))
+
+#Calculate the rank of the PBP types:
+reduced_data %>% 
+  group_by(PBP_type) %>% 
+  summarize(median = median(PBP_type_median_MIC)) %>% 
+  arrange(median) %>% 
+  mutate(rank = row_number()) -> ranked_dataset
+
+# ranktable = rank(sort(unique(reduced_data$PBP_type_median_MIC)))
+# names(ranktable) = sort(unique(reduced_data$PBP_type_median_MIC))
+# ranktable=c(ranktable, "NA"="67")
+# reduced_data$y_pos = as.numeric(as.character(ranktable[match(reduced_data$PBP_type_median_MIC, names(ranktable))]))
+t1 = table(combined_data$PBP_type)
+indmatch = match(ranked_dataset$PBP_type, names(t1))
+ranked_dataset$counts = as.numeric(as.character(t1[indmatch]))
+ranked_dataset$width=sqrt(ranked_dataset$counts)
+#Remove all but one row for each PBP_type
+
+#We need ymin and ymax for the rectangles. 
+
+ymin=rep(0, nrow(ranked_dataset))
+ymax=rep(0, nrow(ranked_dataset))
+
+#Calculate y-positions of rectangles
+for(i in 1:nrow(ranked_dataset)) {
+  
+  if(i!=1){
+    ymin[i] = ymax[i-1]+0.1  
+  }
+  
+  
+  width = ranked_dataset$width[i]
+  #Set minimum width
+  if(width<=0.1){
+    width = 0.1
+  }
+  ymax[i]=ymin[i]+width
+}
+ranked_dataset$ymin = ymin
+ranked_dataset$ymax = ymax
+ranked_dataset$ymed = (ymax+ymin)/2
+
+
+# Functions needed for this post.
 
 reorder_and_sort_factor = function(data,column) {
   
@@ -121,7 +193,6 @@ barplot_pbps_in_dataset <- function(data, dataset,plot=F){
   return(list("pbp1a"=pbp1a,"pbp2b"=pbp2b,"pbp2x"=pbp2x))
 }
 
-library(plotly)
 
 interactive_pbps = function(output_barplots) {
   #plotly::ggplotly(output_barplots$pbp1a)
@@ -129,16 +200,83 @@ interactive_pbps = function(output_barplots) {
   plots = subplot(output_barplots$pbp1a, output_barplots$pbp2b, output_barplots$pbp2x, nrows = 3, titleY = TRUE)
   ggplotly(plots,layout(autosize = F, width = 500, height = 500))
 }
-library(shiny)
+
 
 make_plots = function(total_data, dataset) {
   c1 = barplot_pbps_in_dataset(total_data,dataset)
   interactive_pbps(c1)
 }
 
+
+plot_fraction_by_year_and_dataset=function(dataset="norway_historic") {
+  data = combined_data[combined_data$dataset %in% dataset,]
+  data = data %>% select(tail(names(data),7))
+  #Remove NA
+  #data = data[-which(is.na(data$PBP_type_median_MIC)),]
+  
+  #Sort the data in descending order, then reverse the stack to put NA's on top. 
+  data = data %>% arrange(desc(PBP_type_median_MIC))
+  data[order(data$PBP_type_median_MIC, na.last = TRUE), ]
+  data$PBP_type <- factor(data$PBP_type, levels = unique(data$PBP_type))
+  
+  g1 = ggplot(data)+
+  geom_bar(aes(x=floor(dates), group=PBP_type, fill=PBP_type_median_MIC, text = paste("Count: ", ..count..)),position = position_stack(reverse = TRUE))+
+  theme_classic()+
+  scale_fill_gradient2(low = "lightblue", mid = "red", high = "darkred", midpoint = 8)+
+    scale_x_continuous(labels = as.character(seq(min(floor(data$dates),na.rm=T), max(floor(data$dates),na.rm=T), by = ifelse(length(unique(floor(data$dates))) > 10, 5, 1))), breaks = seq(min(floor(data$dates),na.rm=T), max(floor(data$dates),na.rm=T), by = ifelse(length(unique(floor(data$dates))) > 10, 5, 1)))+
+     labs(y = "Number of isolates",
+       fill="Median MIC of PBP-type",
+       x="Year")
+  ggplotly(g1)
+}
+
+
+
+plot_fraction_by_year_and_dataset2 = function(dataset="norway_historic") {
+  data = combined_data[combined_data$dataset %in% dataset,]
+  data = data %>% select(tail(names(data),7))
+  data = data %>% arrange(desc(PBP_type_median_MIC))
+  data$PBP_type <- factor(data$PBP_type, levels = unique(data$PBP_type))
+  
+  g1 = ggplot(data)+
+  geom_bar(aes(x=floor(dates), y = ..prop.., group=PBP_type, fill=PBP_type_median_MIC, text = paste("Count: ", ..count..)), position=position_fill(reverse = TRUE))+
+  theme_classic()+
+  scale_fill_gradient2(low = "lightblue", mid = "red", high = "darkred", midpoint = 8)+
+    scale_x_continuous(labels = as.character(seq(min(floor(data$dates),na.rm=T), max(floor(data$dates),na.rm=T), by = ifelse(length(unique(floor(data$dates))) > 10, 5, 1))), breaks = seq(min(floor(data$dates),na.rm=T), max(floor(data$dates),na.rm=T), by = ifelse(length(unique(floor(data$dates))) > 10, 5, 1)))+
+     labs(y = "Proportion of isolates",
+       fill="Median MIC of PBP-type",
+       x="Year")
+  ggplotly(g1)
+}
+
+plot_fraction_by_year_and_dataset3 = function(dataset="norway_historic") {
+  data = combined_data[combined_data$dataset %in% dataset,]
+  data = data %>% select(tail(names(data),7))
+  data = data %>% arrange(desc(PBP_type_median_MIC))
+  data$PBP_type <- factor(data$PBP_type, levels = unique(data$PBP_type))
+  #Remove NA
+  if(length(which(is.na(data$PBP_type_median_MIC)))>=1) {
+    data = data[-which(is.na(data$PBP_type_median_MIC)),]
+  }
+  
+  
+  xlabs = as.character(seq(min(floor(data$dates),na.rm=T), max(floor(data$dates),na.rm=T), by = ifelse(length(unique(floor(data$dates))) > 10, 5, 1)))
+  g1 = ggplot(data)+
+  geom_bar(aes(x=floor(dates), y = ..prop.., group=PBP_type, fill=PBP_type_median_MIC, text = paste("Count: ", ..count..)), position=position_fill(reverse = TRUE))+
+  theme_classic()+
+  scale_fill_gradient2(low = "lightblue", mid = "red", high = "darkred", midpoint = 8)+
+    scale_x_continuous(labels = xlabs,
+                       breaks = as.numeric(xlabs))+
+     labs(y = "Proportion of isolates",
+       fill="Median MIC of PBP-type",
+       x="Year")
+  ggplotly(g1)
+}
+
 ```
 
-::: {.panel-tabset style="width:135%"}
+````{=html}
+<!-- ::: {.panel-tabset style="width:135%"}
 ## Norway Routine
 
 ```{r}
@@ -174,4 +312,289 @@ make_plots(combined_data,"massachusetts")
 ```{r}
 make_plots(combined_data,"USA")
 ```
+::: -->
+````
+
+# Abundance and median observed MIC of PBP types
+
+::: {.panel-tabset style="width:135%"}
+# PBP types and observed MIC
+
+```{r}
+
+ranked_dataset_large_width = ranked_dataset %>%
+  filter(width > 5)
+
+g1 = ggplot(ranked_dataset) +
+  geom_rect(aes(xmin = 0, xmax = 1, ymin = ymin, ymax = ymax, fill=median, text=paste("PBP type: ",PBP_type,"<br>","Number of genomes: ",counts))) +
+  geom_text(data = ranked_dataset_large_width, aes(y = ymed, x=-0.005, label = PBP_type), size = 2.5, hjust = 0) +
+  labs(x = NULL, y = "PBP-type") +
+  theme_classic() +
+  scale_fill_gradient2(low = "lightblue", mid = "red", high = "darkred", midpoint = 8)+labs(fill="Median MIC of PBP-type")
+ggplotly(g1)
+```
 :::
+
+## Temporal PBP composition
+
+::: {.panel-tabset style="width:135%"}
+## Norway historic
+
+```{r}
+plot_fraction_by_year_and_dataset(dataset="norway_historic")
+```
+
+## Norway routine
+
+```{r}
+plot_fraction_by_year_and_dataset(dataset="norway_routine")
+```
+
+## Maela
+
+```{r}
+plot_fraction_by_year_and_dataset(dataset="maela")
+```
+
+## South Africa
+
+```{r}
+plot_fraction_by_year_and_dataset(dataset="south_africa")
+```
+
+## Massachusetts
+
+```{r}
+plot_fraction_by_year_and_dataset(dataset="massachusetts")
+```
+
+## The USA
+
+```{r}
+plot_fraction_by_year_and_dataset(dataset="USA")
+```
+:::
+
+## Temporal PBP composition (fraction of total)
+
+::: {.panel-tabset style="width:135%"}
+## Norway historic
+
+```{r}
+plot_fraction_by_year_and_dataset2(dataset="norway_historic")
+```
+
+## Norway routine
+
+```{r}
+plot_fraction_by_year_and_dataset2(dataset="norway_routine")
+```
+
+## Maela
+
+```{r}
+plot_fraction_by_year_and_dataset2(dataset="maela")
+```
+
+## South Africa
+
+```{r}
+plot_fraction_by_year_and_dataset2(dataset="south_africa")
+```
+
+## Massachusetts
+
+```{r}
+plot_fraction_by_year_and_dataset2(dataset="massachusetts")
+```
+
+## The USA
+
+```{r}
+plot_fraction_by_year_and_dataset2(dataset="USA")
+```
+:::
+
+## Temporal PBP composition (fraction of total removing NA's)
+
+::: {.panel-tabset style="width:135%"}
+## Norway historic
+
+```{r}
+plot_fraction_by_year_and_dataset3(dataset="norway_historic")
+```
+
+## Norway routine
+
+```{r}
+plot_fraction_by_year_and_dataset3(dataset="norway_routine")
+```
+
+## Maela
+
+```{r}
+plot_fraction_by_year_and_dataset3(dataset="maela")
+```
+
+## South Africa
+
+```{r}
+plot_fraction_by_year_and_dataset3(dataset="south_africa")
+```
+
+## Massachusetts
+
+```{r}
+plot_fraction_by_year_and_dataset3(dataset="massachusetts")
+```
+
+## The USA
+
+```{r}
+plot_fraction_by_year_and_dataset3(dataset="USA")
+```
+:::
+
+# References
+
+::: {#refs}
+:::
+
+```{r, include=F, eval=F}
+This is my data:
+
+> df_norway2
+# A tibble: 816 × 5
+# Groups:   dates [33]
+   dates PBP_type      n PBP_type_median_MIC percentage
+   <dbl> <fct>     <int>               <dbl>      <dbl>
+ 1  1998 2-0-61        1              0.004    0.0294  
+ 2    NA NEW-0-6       1              0.008    0.000767
+ 3  2000 23-4-468      1              0.012    0.0333  
+ 4  1985 86-82-162     2              0.015    0.0556  
+ 5  1988 0-0-6         1              0.015    0.0303  
+ 6    NA 3-NEW-5       2              0.015    0.00153 
+ 7    NA 3-6-NEW       2              0.0155   0.00153 
+ 8  1982 3-6-5         1              0.016    0.0345  
+ 9  1982 62-0-2        3              0.016    0.103   
+10  1983 62-0-2        4              0.016    0.125   
+# … with 806 more rows
+# ℹ Use `print(n = ...)` to see more rows
+
+I want to use plotly in R.
+I want to plot stacked areas graph of the percentage column.
+I want the areas grouped grouped and ordered by PBP_type, with lines separating each area.
+I want the fill to be colored according to the value of PBP_type_median_MIC with a color scale c("lightblue", "red", "darkred")) corresponding to continous values from 0-16. 
+Can you help me write the code my code to achieve this?  
+
+
+  
+  
+  # Create a color scale based on PBP_type_median_MIC
+color_scale <- list(
+  c(0, "lightblue"),
+  c(16/100, "red"),
+  c(1, "darkred")
+)
+
+# Plot stacked areas graph of percentage column
+plot_ly(df_norway2,
+        x = ~dates,
+        y = ~percentage,
+        color = ~PBP_type_median_MIC,
+        colors = color_scale,
+        type = "scatter",
+        mode = "none",
+        fill = "tonexty",
+        hoverinfo = "text",
+        text = ~paste("PBP type:", PBP_type)
+) %>%
+  layout(
+    title = "Stacked areas graph of percentage column by PBP type",
+    xaxis = list(title = "Dates"),
+    yaxis = list(title = "Percentage")
+  )
+  
+  # filter out rows with missing dates
+df_norway3 <- df_norway2
+
+# create a custom colorscale
+cscale <- colorRamp(c("lightblue", "red", "darkred"))
+
+# plot a stacked area graph
+p <- df_norway3 %>%
+  group_by(PBP_type) %>%
+  plot_ly(x = ~dates,
+          y = ~percentage,
+          type = "scatter",
+          mode = "none",
+          color = ~PBP_type_median_MIC,
+          colors = cscale,
+          fill = "tonexty") %>%  add_trace() %>%  
+  layout(title = "Stacked Area Graph of Percentage by PBP_type",
+         xaxis = list(title = "Dates"),
+         yaxis = list(title = "Percentage"),
+         coloraxis = list(colorbar = list(title="PBP_type_median_MIC")))
+
+p
+#   ____________________________________________________________________________
+#   prompt                                                                  ####
+# My dataset looks like this:
+# 
+#   PBP1a PBP2b PBP2x dataset
+# 1    42    42     8     USA
+# 2     1     0     6     USA
+# 3     2     4     0     USA
+# 
+# I want to make a function that plots barplots of the PBP1a, PBP2b, and the PBP2x columns in the combined dataset. 
+# Use ggplot to do following things: 
+# Define a barplot function called barplot_pbps_in_dataset.
+# Make the barplot function select the rows of the combined data that corresponding to an user input value (string).
+# Make a barplot of PBP1a using ggplot on the the selected rows. Set the title of the plot to PBP1a.
+# Make a barplot of PBP2b using the selected rows. Set the title of the plot to PBP2b.
+# Make a barplot of PBP2x using the selected rows. Set the title of the plot to PBP2x.
+# Arrange the barplots in 3 rows and 1 column, and return the plot to the user.
+# 
+#  [1] "42"  "1"   "2"   "45"  "0"   "NF" "NEW" "208" "141" "111"
+# R-programming language. 
+# Reorder this factor variable by dplyr and sort by the sorting by numeric values. Make any non-numeric values appear last. turn it back into a factor
+# 
+
+#   PBP-MIC_plot                                                            ####
+# library(ggplot2)
+# 
+# 
+# library(plotly)
+# ggplot(reduced_data, aes(x=PBP_type,y=y_pos, color=PBP_type_median_MIC))+
+#   geom_point()+
+#   scale_color_gradient(low="blue",
+#                      high="red", space ="Lab" )
+
+
+# g1 =ggplot(ranked_dataset) +
+#     geom_rect(aes(xmin = 0, xmax = 1, ymin = ymin, ymax = ymax, fill=median)) +
+#     labs(x = NULL, y = "PBP-type")+theme_light()+scale_fill_gradient2(low = "lightblue",mid="red",high = "darkred", midpoint=8)
+# ggplotly(g1)
+# 
+# 
+# ranked_dataset_large_width = ranked_dataset %>%
+#   filter(width > 5)
+# 
+# g1 = ggplot(ranked_dataset) +
+#   geom_rect(aes(xmin = 0, xmax = 1, ymin = ymin, ymax = ymax, fill=median, text=paste("PBP type: ",PBP_type,"<br>","Number of genomes: ",counts))) +
+#   geom_text(data = ranked_dataset_large_width, aes(y = ymed, x=-0.005, label = PBP_type), size = 2.5, hjust = 0) +
+#   labs(x = NULL, y = "PBP-type") +
+#   theme_light() +
+#   scale_fill_gradient2(low = "lightblue", mid = "red", high = "darkred", midpoint = 8)
+# g1
+# ggplotly(g1)
+
+# ggplot(reduced_data, aes(x = PBP_type, y = PBP_type_median_MIC, color = mic_colors, size = PBP_type_ranked_MIC)) + 
+#   geom_point() + 
+#   scale_color_identity() +
+#   ggtitle("Scatter Plot of penMIC_observed and PBP_type_median_MIC") +
+#   xlab("penMIC_observed") +
+#   ylab("PBP_type_mean_MIC")+theme_light()+xlab("")
+# ggplotly()
+
+```
